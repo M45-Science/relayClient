@@ -34,7 +34,7 @@ func connectHandler() {
 		}
 
 		log.Printf("Too many unsuccsessful connection attempts (%v), stopping.\nQuit then relaunch to try again.", maxAttempts)
-		time.Sleep(time.Hour * 24)
+		select {}
 	} else {
 		for {
 			ephemeralLock.Lock()
@@ -63,7 +63,7 @@ func connectTunnel() {
 
 	err = frameHandler(tun)
 	if err != nil {
-		log.Printf("readFrame: %v", err)
+		log.Printf("frameHandler: %v", err)
 	}
 }
 
@@ -86,11 +86,7 @@ func (tun *tunnelCon) readPacket() error {
 		return fmt.Errorf("unable to read payload: %v", err)
 	}
 	if payloadLen != uint64(l) {
-		return fmt.Errorf("Failed reading whole packet from tunnel: read %v of %v", l, payloadLen)
-	}
-
-	if verboseLog {
-		log.Printf("SessionID: %v, expect: %v got %v", sessionID, payloadLen, l)
+		return fmt.Errorf("failed reading whole packet from tunnel: read %vb of %vb", l, payloadLen)
 	}
 
 	//Lookup destination via ID
@@ -99,7 +95,7 @@ func (tun *tunnelCon) readPacket() error {
 	ephemeralLock.Unlock()
 
 	if dest == nil {
-		return fmt.Errorf("Received response for invalid ID: %v", sessionID)
+		return fmt.Errorf("received response for invalid ID: %v", sessionID)
 	} else {
 		addr, err := net.ResolveUDPAddr("udp", dest.source)
 		if err != nil {
@@ -111,10 +107,10 @@ func (tun *tunnelCon) readPacket() error {
 			return fmt.Errorf("unable to write payload: %v", err)
 		}
 		if w != int(payloadLen) {
-			return fmt.Errorf("Only wrote %vb of %vb to %v", w, payloadLen, dest.destPort)
+			return fmt.Errorf("only wrote %vb of %vb to %v", w, payloadLen, dest.destPort)
 		}
 		if verboseLog {
-			log.Printf("Wrote %vb to %v", w, dest.destPort)
+			log.Printf("wrote %vb to %v", w, dest.destPort)
 		}
 	}
 

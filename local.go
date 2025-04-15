@@ -53,6 +53,7 @@ func handleListeners(tun *tunnelCon) {
 					header = binary.AppendUvarint(header, 0)
 					header = binary.AppendUvarint(header, uint64(newSession.destPort))
 				}
+
 				//Write standard header
 				header = binary.AppendUvarint(header, uint64(session.id))
 				header = binary.AppendUvarint(header, uint64(n))

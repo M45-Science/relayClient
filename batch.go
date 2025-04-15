@@ -21,7 +21,7 @@ func (tun *tunnelCon) Write(buf []byte) {
 		tun.packetsLength = len(buf)
 		err := writeBatch(tun)
 		if err != nil {
-			log.Printf("Write: %v", err)
+			log.Printf("tun write: %v", err)
 		}
 	} else {
 		tun.packets = append(tun.packets, buf...)
@@ -65,11 +65,11 @@ func writeBatch(tun *tunnelCon) error {
 	header = binary.AppendUvarint(header, uint64(len(dataToWrite)))
 	l, err := tun.con.Write(append(header, dataToWrite...))
 	if err != nil {
-		return fmt.Errorf("batchWrite: Write error: %v", err)
+		return fmt.Errorf("writeBatch: Write error: %v", err)
 	}
 
 	if l < len(dataToWrite) {
-		return fmt.Errorf("batchWrite: Partial write: wrote %d of %d bytes", l, len(dataToWrite))
+		return fmt.Errorf("writeBatch: Partial write: wrote %d of %d bytes", l, len(dataToWrite))
 	}
 
 	tun.packets = nil
@@ -81,12 +81,12 @@ func compressFrame(tun *tunnelCon) []byte {
 	var buf bytes.Buffer
 	gz, _ := gzip.NewWriterLevel(&buf, compressionLevels[compressionLevel])
 	if _, err := gz.Write(tun.packets); err != nil {
-		log.Printf("gzip write error: %v", err)
+		log.Printf("compressFrame: gzip write error: %v", err)
 		_ = gz.Close()
 		return nil
 	}
 	if err := gz.Close(); err != nil {
-		log.Printf("gzip close error: %v", err)
+		log.Printf("compressFrame: gzip close error: %v", err)
 		return nil
 	}
 	return buf.Bytes()
@@ -96,13 +96,13 @@ func decompressFrame(data []byte) ([]byte, error) {
 	buf := bytes.NewReader(data)
 	gz, err := gzip.NewReader(buf)
 	if err != nil {
-		return nil, fmt.Errorf("gzip reader error: %v", err)
+		return nil, fmt.Errorf("decompressFrame: gzip reader error: %v", err)
 	}
 	defer gz.Close()
 
 	var out bytes.Buffer
 	if _, err := io.Copy(&out, gz); err != nil {
-		return nil, fmt.Errorf("gzip decompress copy error: %v", err)
+		return nil, fmt.Errorf("decompressFrame: gzip decompress copy error: %v", err)
 	}
 	return out.Bytes(), nil
 }

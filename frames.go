@@ -53,10 +53,9 @@ func readFrameHeader(tun *tunnelCon) error {
 
 	if compressionLevel > 0 {
 		frameData, err = decompressFrame(frameData)
-	}
-
-	if err != nil {
-		return fmt.Errorf("decompress failed: %v", err)
+		if err != nil {
+			return err
+		}
 	}
 
 	tun.packetReader = bytes.NewReader(frameData)

@@ -14,6 +14,8 @@ import (
 	"strconv"
 )
 
+const privateIndexFilename = "index.html"
+
 func handleForwardedPorts(tun *tunnelCon, portCounts int) error {
 	for _, listener := range listeners {
 		listener.Close()
@@ -37,6 +39,7 @@ func handleForwardedPorts(tun *tunnelCon, portCounts int) error {
 			return fmt.Errorf("unable to read name length: %v", err)
 		}
 
+		//Read name
 		var name []byte
 		if nameLen > 0 {
 			name = make([]byte, nameLen)
@@ -60,12 +63,12 @@ func handleForwardedPorts(tun *tunnelCon, portCounts int) error {
 		}
 		portsStr = portsStr + strconv.FormatUint(port, 10)
 
+		//Add listener
 		laddr := &net.UDPAddr{IP: nil, Port: int(port)}
 		conn, err := net.ListenUDP("udp", laddr)
 		if err != nil {
 			return fmt.Errorf("unable to read from laddr: %v", err)
 		}
-
 		listeners = append(listeners, conn)
 	}
 
@@ -84,37 +87,33 @@ func outputServerList() {
 		data.Servers = append(data.Servers, server)
 	}
 
-	tem := privateServerTemplate
+	sourceTemplate := privateServerTemplate
 	if PublicClientMode != "true" {
-		tem = publicServerTemplate
+		sourceTemplate = publicServerTemplate
+		htmlFileName = privateIndexFilename
 	}
 
-	tmpl, err := template.New("page").Parse(tem)
+	parsedTemplate, err := template.New("page").Parse(sourceTemplate)
 	if err != nil {
 		log.Fatalf("Failed to parse template: %v", err)
 	}
 
-	if PublicClientMode != "true" {
-		htmlFileName = "index.html"
-	}
 	f, err := os.Create(htmlFileName)
 	if err != nil {
 		log.Fatalf("Failed to create file: %v", err)
 	}
 	defer f.Close()
 
-	err = tmpl.Execute(f, data)
+	err = parsedTemplate.Execute(f, data)
 	if err != nil {
 		log.Fatalf("Failed to execute template: %v", err)
 	}
 
-	log.Printf("UPDATED %v written successfully... (attempting to open)", htmlFileName)
+	log.Printf("%v written successfully.", htmlFileName)
 
 	if PublicClientMode == "true" {
 		if err := openInBrowser(htmlFileName); err != nil {
 			log.Printf("Failed to open in browser: %v", err)
-		} else {
-			log.Printf("The server list should now be open!")
 		}
 	}
 }
