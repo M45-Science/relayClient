@@ -15,4 +15,3 @@ M45 RELAY CLIENT INSTRUCTIONS
    - Click "Connect"
 
 -----------------------------
-For additional details, refer to the HTML version of these instructions (instructions.html).
