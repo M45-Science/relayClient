@@ -14,10 +14,10 @@ const (
 	SERVER_KEY      = 0xCAFE69C0FFEE
 	CLIENT_KEY      = 0xADD069C0FFEE
 
-	publicReconDelaySec = 2
-	recondDelaySec      = 5
-	maxAttempts         = 60 / publicReconDelaySec
-	attemptResetAfter   = time.Minute * 5
+	publicReconDelaySec  = 2
+	privateReconDelaySec = 5
+	maxAttempts          = 60 / publicReconDelaySec
+	attemptResetAfter    = time.Minute * 5
 
 	bufferSizeUDP = 65 * 1024
 	downloadURL   = "https://m45sci.xyz/eu#downloads"

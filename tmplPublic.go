@@ -1,6 +1,6 @@
 package main
 
-const pageTemplate2 = `
+const publicServerTemplate = `
 <!DOCTYPE html>
 <html lang="en">
 

@@ -84,9 +84,9 @@ func outputServerList() {
 		data.Servers = append(data.Servers, server)
 	}
 
-	tem := pageTemplate
+	tem := privateServerTemplate
 	if PublicClientMode != "true" {
-		tem = pageTemplate2
+		tem = publicServerTemplate
 	}
 
 	tmpl, err := template.New("page").Parse(tem)

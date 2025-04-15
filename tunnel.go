@@ -44,7 +44,7 @@ func connectHandler() {
 			ephemeralLock.Unlock()
 			connectTunnel()
 
-			time.Sleep(time.Second * recondDelaySec)
+			time.Sleep(time.Second * privateReconDelaySec)
 		}
 	}
 }
