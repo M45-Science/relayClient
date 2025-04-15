@@ -50,7 +50,6 @@ func (tun *tunnelCon) batchWriter() {
 }
 
 func writeBatch(tun *tunnelCon) error {
-
 	if tun.packetsLength == 0 {
 		return nil
 	}
@@ -59,7 +58,6 @@ func writeBatch(tun *tunnelCon) error {
 	if compressionLevel > 0 {
 		dataToWrite = compressFrame(tun)
 	} else {
-		// Write raw data, no compression
 		dataToWrite = tun.packets
 	}
 
@@ -80,16 +78,15 @@ func writeBatch(tun *tunnelCon) error {
 }
 
 func compressFrame(tun *tunnelCon) []byte {
-	// Compress the data
 	var buf bytes.Buffer
 	gz, _ := gzip.NewWriterLevel(&buf, compressionLevels[compressionLevel])
 	if _, err := gz.Write(tun.packets); err != nil {
-		log.Printf("batchWrite: gzip write error: %v", err)
+		log.Printf("gzip write error: %v", err)
 		_ = gz.Close()
 		return nil
 	}
 	if err := gz.Close(); err != nil {
-		log.Printf("batchWrite: gzip close error: %v", err)
+		log.Printf("gzip close error: %v", err)
 		return nil
 	}
 	return buf.Bytes()
