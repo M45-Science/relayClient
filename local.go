@@ -87,7 +87,7 @@ func cleanEphemeralMaps() {
 			for key, item := range ephemeralPortMap {
 				if time.Since(item.lastUsed) > ephemeralLife {
 					if verboseLog {
-						doLog("Deleted idle ephemeral port: %v: -> %v", item.id, key)
+						doLog("Deleted idle ephemeral port: %v: -> %v", item.id, item.source)
 					}
 					item.listener.Close()
 					delete(ephemeralPortMap, key)
@@ -95,7 +95,7 @@ func cleanEphemeralMaps() {
 			}
 			for key, item := range ephemeralIDMap {
 				if time.Since(item.lastUsed) > ephemeralLife {
-					doLog("Deleted idle ephemeral id: %v: -> %v", item.id, key)
+					doLog("Deleted idle ephemeral id: %v: -> %v", item.id, item.source)
 					item.listener.Close()
 					delete(ephemeralIDMap, key)
 				}
