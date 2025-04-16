@@ -19,6 +19,7 @@ const (
 	maxAttempts          = 60 / publicReconDelaySec
 	attemptResetAfter    = time.Minute * 5
 	ephemeralLife        = time.Minute
+	ephemeralTicker      = time.Second * 15
 
 	bufferSizeUDP = 65 * 1024
 	downloadURL   = "https://m45sci.xyz/eu#downloads"

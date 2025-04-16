@@ -80,7 +80,7 @@ func getPortStr(input string) int {
 
 func cleanEphemeralMaps() {
 	go func() {
-		ticker := time.NewTicker(ephemeralLife)
+		ticker := time.NewTicker(ephemeralTicker)
 
 		for range ticker.C {
 			ephemeralLock.Lock()
