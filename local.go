@@ -41,9 +41,11 @@ func handleListeners(tun *tunnelCon) {
 					session = newSession
 
 					log.Printf("NEW SESSION ID: %v: %vb: %v -> %v\n", newSession.id, n, newSession.source, newSession.destPort)
-				} else if verboseLog {
+				} else {
 					session.lastUsed = time.Now()
-					log.Printf("Session ID: %v: %vb: %v -> %v\n", session.id, n, session.source, session.destPort)
+					if verboseLog {
+						log.Printf("Session ID: %v: %vb: %v -> %v\n", session.id, n, session.source, session.destPort)
+					}
 				}
 				ephemeralLock.Unlock()
 
