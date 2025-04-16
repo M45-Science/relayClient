@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"runtime"
 	"strings"
 	"syscall"
 )
@@ -25,7 +24,7 @@ func main() {
 	flag.BoolVar(&verboseLog, "verboseLog", false, "debug logging")
 	flag.Parse()
 
-	if runtime.GOOS != "windows" {
+	if enableVirtualTerminalProcessing() == nil {
 		logo := strings.ReplaceAll(logoANSI, "\\e", "\x1b")
 		fmt.Println(logo + "\nM45-Science")
 	}
@@ -37,7 +36,7 @@ func main() {
 	go cleanEphemeralMaps()
 
 	<-sigs
-	doLog("[QUIT] Server shutting down: Signal: %v", sigs)
+	doLog("[QUIT] relayClient Shutting down: Signal: %v", sigs)
 }
 
 const logoANSI = `\e[48;5;0m          \e[48;5;254m  \e[48;5;255m  \e[48;5;243m  \e[48;5;242m  \e[48;5;0m                        \e[m
