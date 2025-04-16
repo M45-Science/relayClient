@@ -26,11 +26,29 @@ func cleanEphemeralMaps() {
 				if time.Since(item.lastUsed) > ephemeralLife {
 					doLog("Deleted idle ephemeral id: %v: -> %v", item.id, item.source)
 					delete(ephemeralIDMap, key)
+					ephemeralIDRecycle = append(ephemeralIDRecycle, key)
+					ephemeralIDRecycleLen++
 				}
 			}
 			ephemeralLock.Unlock()
 		}
 	}()
+}
+
+func createEphemeralID() int {
+	if ephemeralIDRecycleLen > 0 {
+		recycledID := ephemeralIDRecycle[0]
+		ephemeralIDRecycle = ephemeralIDRecycle[1:]
+		ephemeralIDRecycleLen--
+		if 1 == 1 {
+			doLog("Recycling ephemeral ID %v", recycledID)
+		}
+		return recycledID
+	} else {
+		newID := ephemeralTop
+		ephemeralTop++
+		return newID
+	}
 }
 
 func handleListeners(tun *tunnelCon) {
@@ -59,15 +77,16 @@ func handleListeners(tun *tunnelCon) {
 
 				// New session, create
 				if session == nil {
+					eID := createEphemeralID()
+
 					newSession = &ephemeralData{
-						id: ephemeralTop, source: addr.String(),
+						id: eID, source: addr.String(),
 						destPort: getPortStr(p.LocalAddr().String()),
 						lastUsed: time.Now(), listener: port}
 
 					ephemeralPortMap[addr.String()] = newSession
-					ephemeralIDMap[ephemeralTop] = newSession
+					ephemeralIDMap[eID] = newSession
 
-					ephemeralTop++
 					session = newSession
 					doLog("NEW SESSION ID: %v: %v -> %v", newSession.id, newSession.source, newSession.destPort)
 				} else {

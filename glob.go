@@ -52,7 +52,10 @@ var (
 	PublicClientMode      string
 	verboseLog, forceHTML bool
 
-	ephemeralTop     int                       = 1
+	ephemeralTop          int = 1
+	ephemeralIDRecycle    []int
+	ephemeralIDRecycleLen int
+
 	ephemeralIDMap   map[int]*ephemeralData    = map[int]*ephemeralData{}
 	ephemeralPortMap map[string]*ephemeralData = map[string]*ephemeralData{}
 	ephemeralLock    sync.Mutex
