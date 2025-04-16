@@ -9,6 +9,17 @@ import (
 	"time"
 )
 
+func reconnect() {
+	ephemeralLock.Lock()
+	ephemeralTop = 1
+	ephemeralIDMap = map[int]*ephemeralData{}
+	ephemeralPortMap = map[string]*ephemeralData{}
+	ephemeralIDRecycle = []int{}
+	ephemeralIDRecycleLen = 0
+	ephemeralLock.Unlock()
+	connectTunnel()
+}
+
 func connectHandler() {
 
 	if PublicClientMode == "true" {
@@ -18,12 +29,7 @@ func connectHandler() {
 				time.Sleep(time.Duration(publicReconDelaySec) * time.Second)
 			}
 
-			ephemeralLock.Lock()
-			ephemeralTop = 1
-			ephemeralIDMap = map[int]*ephemeralData{}
-			ephemeralPortMap = map[string]*ephemeralData{}
-			ephemeralLock.Unlock()
-			connectTunnel()
+			reconnect()
 
 			//Eventually reset tries
 			if time.Since(lastConnect) > attemptResetAfter {
@@ -36,14 +42,7 @@ func connectHandler() {
 		select {}
 	} else {
 		for {
-			ephemeralLock.Lock()
-			ephemeralTop = 1
-			ephemeralIDMap = map[int]*ephemeralData{}
-			ephemeralPortMap = map[string]*ephemeralData{}
-			ephemeralIDRecycle = []int{}
-			ephemeralIDRecycleLen = 0
-			ephemeralLock.Unlock()
-			connectTunnel()
+			reconnect()
 
 			time.Sleep(time.Second * privateReconDelaySec)
 		}
