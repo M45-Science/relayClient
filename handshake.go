@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"log"
 )
 
 func writeHandshakePacket(tun *tunnelCon) {
@@ -30,8 +29,8 @@ func readHandshakePacket(tun *tunnelCon) error {
 		return fmt.Errorf("unable to read protocol version: %v", err)
 	}
 	if proto != protocolVersion {
-		log.Printf("protocol version not compatible: %v.", proto)
-		log.Printf("Please download a new version from %v", downloadURL)
+		doLog("protocol version not compatible: %v.", proto)
+		doLog("Please download a new version from %v", downloadURL)
 		openInBrowser(downloadURL)
 		select {}
 	}
@@ -74,7 +73,7 @@ func readHandshakePacket(tun *tunnelCon) error {
 	}
 	serverID = int(sid)
 
-	log.Printf("Proto: %v, Compress: %v, Batch: %v, ServerID: %v", proto, compressionLevel, batchingMicroseconds, serverID)
+	doLog("Proto: %v, Compress: %v, Batch: %v, ServerID: %v", proto, compressionLevel, batchingMicroseconds, serverID)
 
 	//Forwarded port count
 	forwardedPortCount, err := binary.ReadUvarint(tun.frameReader)

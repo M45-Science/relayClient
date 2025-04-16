@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"log"
 	"time"
 )
 
@@ -21,7 +20,7 @@ func (tun *tunnelCon) Write(buf []byte) {
 		tun.packetsLength = len(buf)
 		err := writeBatch(tun)
 		if err != nil {
-			log.Printf("tun write: %v", err)
+			doLog("tun write: %v", err)
 		}
 	} else {
 		tun.packets = append(tun.packets, buf...)
@@ -81,12 +80,12 @@ func compressFrame(tun *tunnelCon) []byte {
 	var buf bytes.Buffer
 	gz, _ := gzip.NewWriterLevel(&buf, compressionLevels[compressionLevel])
 	if _, err := gz.Write(tun.packets); err != nil {
-		log.Printf("compressFrame: gzip write error: %v", err)
+		doLog("compressFrame: gzip write error: %v", err)
 		_ = gz.Close()
 		return nil
 	}
 	if err := gz.Close(); err != nil {
-		log.Printf("compressFrame: gzip close error: %v", err)
+		doLog("compressFrame: gzip close error: %v", err)
 		return nil
 	}
 	return buf.Bytes()

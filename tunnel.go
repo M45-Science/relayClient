@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"time"
 )
@@ -33,7 +32,7 @@ func connectHandler() {
 			lastConnect = time.Now()
 		}
 
-		log.Printf("Too many unsuccsessful connection attempts (%v), stopping.\nQuit then relaunch to try again.", maxAttempts)
+		doLog("Too many unsuccsessful connection attempts (%v), stopping.\nQuit then relaunch to try again.", maxAttempts)
 		select {}
 	} else {
 		for {
@@ -50,11 +49,11 @@ func connectHandler() {
 }
 
 func connectTunnel() {
-	log.Printf("Connecting to %v...", tunnelServerAddr)
+	doLog("Connecting to %v...", tunnelServerAddr)
 	var err error
 	con, err := net.Dial("tcp", tunnelServerAddr)
 	if err != nil {
-		log.Printf("Unable to connect: %v", err)
+		doLog("Unable to connect: %v", err)
 		return
 	}
 
@@ -63,7 +62,7 @@ func connectTunnel() {
 
 	err = frameHandler(tun)
 	if err != nil {
-		log.Printf("frameHandler: %v", err)
+		doLog("frameHandler: %v", err)
 	}
 }
 
@@ -110,7 +109,7 @@ func (tun *tunnelCon) readPacket() error {
 			return fmt.Errorf("only wrote %vb of %vb to %v", w, payloadLen, dest.destPort)
 		}
 		if verboseLog {
-			log.Printf("wrote %vb to %v", w, dest.destPort)
+			doLog("wrote %vb to %v", w, dest.destPort)
 		}
 	}
 

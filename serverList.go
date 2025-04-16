@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
@@ -72,7 +71,7 @@ func handleForwardedPorts(tun *tunnelCon, portCounts int) error {
 		listeners = append(listeners, conn)
 	}
 
-	log.Printf("Forwarded ports: %v", portsStr)
+	doLog("Forwarded ports: %v", portsStr)
 	outputServerList()
 
 	return nil
@@ -109,11 +108,11 @@ func outputServerList() {
 		log.Fatalf("Failed to execute template: %v", err)
 	}
 
-	log.Printf("%v written successfully.", htmlFileName)
+	doLog("%v written successfully.", htmlFileName)
 
 	if PublicClientMode == "true" {
 		if err := openInBrowser(htmlFileName); err != nil {
-			log.Printf("Failed to open in browser: %v", err)
+			doLog("Failed to open in browser: %v", err)
 		}
 	}
 }
@@ -131,22 +130,4 @@ func openInBrowser(path string) error {
 	}
 
 	return cmd.Start()
-}
-
-func tinyHTTPServer() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		data, err := os.ReadFile("index.html")
-		if err != nil {
-			http.Error(w, "File not found.", http.StatusNotFound)
-			return
-		}
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write(data)
-	})
-
-	log.Println("Serving index.html on port 80...")
-	err := http.ListenAndServe(":80", nil)
-	if err != nil {
-		log.Fatalf("Failed to start server: %v", err)
-	}
 }

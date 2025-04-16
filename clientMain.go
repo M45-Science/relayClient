@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"runtime"
@@ -30,16 +29,15 @@ func main() {
 		logo := strings.ReplaceAll(logoANSI, "\\e", "\x1b")
 		fmt.Println(logo + "\nM45-Science")
 	}
-	log.Println("[START] goRelay client started.")
+	startLog()
+	autoRotateLogs()
+	doLog("[START] goRelay client started.")
 
-	if PublicClientMode != "true" {
-		go tinyHTTPServer()
-	}
 	go connectHandler()
 	go cleanEphemeralMaps()
 
 	<-sigs
-	log.Printf("[QUIT] Server shutting down: Signal: %v", sigs)
+	doLog("[QUIT] Server shutting down: Signal: %v", sigs)
 }
 
 func cleanEphemeralMaps() {
@@ -51,7 +49,7 @@ func cleanEphemeralMaps() {
 			for key, item := range ephemeralPortMap {
 				if time.Since(item.lastUsed) > ephemeralLife {
 					if verboseLog {
-						log.Printf("Deleted idle ephemeral port: %v", key)
+						doLog("Deleted idle ephemeral port: %v", key)
 					}
 					delete(ephemeralPortMap, key)
 				}
@@ -59,7 +57,7 @@ func cleanEphemeralMaps() {
 			for key, item := range ephemeralIDMap {
 				if time.Since(item.lastUsed) > ephemeralLife {
 					if verboseLog {
-						log.Printf("Deleted idle ephemeral id: %v", key)
+						doLog("Deleted idle ephemeral id: %v", key)
 					}
 					delete(ephemeralIDMap, key)
 				}

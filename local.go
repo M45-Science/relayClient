@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/binary"
-	"log"
 	"net"
 	"strconv"
 	"strings"
@@ -18,7 +17,7 @@ func handleListeners(tun *tunnelCon) {
 				buf := make([]byte, bufferSizeUDP)
 				n, addr, err := p.ReadFromUDP(buf)
 				if err != nil {
-					log.Println("Error reading:", err)
+					doLog("Error reading:", err)
 					return
 				}
 
@@ -39,12 +38,13 @@ func handleListeners(tun *tunnelCon) {
 
 					ephemeralTop++
 					session = newSession
-
-					log.Printf("NEW SESSION ID: %v: %vb: %v -> %v\n", newSession.id, n, newSession.source, newSession.destPort)
+					if verboseLog {
+						doLog("NEW SESSION ID: %v: %vb: %v -> %v\n", newSession.id, n, newSession.source, newSession.destPort)
+					}
 				} else {
 					session.lastUsed = time.Now()
 					if verboseLog {
-						log.Printf("Session ID: %v: %vb: %v -> %v\n", session.id, n, session.source, session.destPort)
+						doLog("Session ID: %v: %vb: %v -> %v\n", session.id, n, session.source, session.destPort)
 					}
 				}
 				ephemeralLock.Unlock()
