@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	meep               = 1
 	defaultCompression = 1
 )
 
