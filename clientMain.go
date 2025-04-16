@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
 	"strings"
 	"syscall"
 	"time"
@@ -25,8 +26,10 @@ func main() {
 	flag.BoolVar(&verboseLog, "verboseLog", false, "debug logging")
 	flag.Parse()
 
-	logo := strings.ReplaceAll(logoANSI, "\\e", "\x1b")
-	fmt.Println(logo + "\nM45-Science")
+	if runtime.GOOS != "windows" {
+		logo := strings.ReplaceAll(logoANSI, "\\e", "\x1b")
+		fmt.Println(logo + "\nM45-Science")
+	}
 	log.Println("[START] goRelay client started.")
 
 	if PublicClientMode != "true" {
