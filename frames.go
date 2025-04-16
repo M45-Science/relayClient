@@ -24,6 +24,7 @@ func frameHandler(tun *tunnelCon) error {
 func (tun *tunnelCon) readFrames() {
 	err := readFrameHeader(tun)
 	if err != nil {
+		//doLog(err.Error())
 		return
 	}
 

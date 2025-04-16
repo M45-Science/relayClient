@@ -8,10 +8,35 @@ import (
 	"time"
 )
 
-// TO DO: Add contexts and deadlines
+func cleanEphemeralMaps() {
+	go func() {
+		ticker := time.NewTicker(ephemeralTicker)
+
+		for range ticker.C {
+			ephemeralLock.Lock()
+			for key, item := range ephemeralPortMap {
+				if time.Since(item.lastUsed) > ephemeralLife {
+					if verboseLog {
+						doLog("Deleted idle ephemeral port: %v: -> %v", item.id, item.source)
+					}
+					delete(ephemeralPortMap, key)
+				}
+			}
+			for key, item := range ephemeralIDMap {
+				if time.Since(item.lastUsed) > ephemeralLife {
+					doLog("Deleted idle ephemeral id: %v: -> %v", item.id, item.source)
+					delete(ephemeralIDMap, key)
+				}
+			}
+			ephemeralLock.Unlock()
+		}
+	}()
+}
+
 func handleListeners(tun *tunnelCon) {
 	for _, port := range listeners {
 		go func(p *net.UDPConn) {
+			//defer doLog("handleListeners: exit")
 			for p != nil {
 				// Read payload
 				buf := make([]byte, bufferSizeUDP)
@@ -49,6 +74,7 @@ func handleListeners(tun *tunnelCon) {
 					if verboseLog {
 						doLog("Session ID: %v: %vb: %v -> %v", session.id, n, session.source, session.destPort)
 					}
+					session.lastUsed = time.Now()
 				}
 				ephemeralLock.Unlock()
 
@@ -63,7 +89,6 @@ func handleListeners(tun *tunnelCon) {
 				header = binary.AppendUvarint(header, uint64(session.id))
 				header = binary.AppendUvarint(header, uint64(n))
 				tun.Write(append(header, buf[:n]...))
-				session.lastUsed = time.Now()
 			}
 		}(port)
 	}
@@ -76,31 +101,4 @@ func getPortStr(input string) int {
 	portStr := parts[numparts-1]
 	port, _ := strconv.ParseUint(portStr, 10, 64)
 	return int(port)
-}
-
-func cleanEphemeralMaps() {
-	go func() {
-		ticker := time.NewTicker(ephemeralTicker)
-
-		for range ticker.C {
-			ephemeralLock.Lock()
-			for key, item := range ephemeralPortMap {
-				if time.Since(item.lastUsed) > ephemeralLife {
-					if verboseLog {
-						doLog("Deleted idle ephemeral port: %v: -> %v", item.id, item.source)
-					}
-					item.listener.Close()
-					delete(ephemeralPortMap, key)
-				}
-			}
-			for key, item := range ephemeralIDMap {
-				if time.Since(item.lastUsed) > ephemeralLife {
-					doLog("Deleted idle ephemeral id: %v: -> %v", item.id, item.source)
-					item.listener.Close()
-					delete(ephemeralIDMap, key)
-				}
-			}
-			ephemeralLock.Unlock()
-		}
-	}()
 }

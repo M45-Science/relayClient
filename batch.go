@@ -35,6 +35,8 @@ func (tun *tunnelCon) batchWriter() {
 	}
 	ticker := time.NewTicker(time.Microsecond * time.Duration(batchingMicroseconds))
 
+	//defer doLog("batchWriter: exit")
+
 	for range ticker.C {
 		if tun == nil || tun.con == nil {
 			return
@@ -46,6 +48,7 @@ func (tun *tunnelCon) batchWriter() {
 			return
 		}
 	}
+
 }
 
 func writeBatch(tun *tunnelCon) error {

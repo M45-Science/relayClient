@@ -91,6 +91,9 @@ func (tun *tunnelCon) readPacket() error {
 	//Lookup destination via ID
 	ephemeralLock.Lock()
 	dest := ephemeralIDMap[int(sessionID)]
+	if dest != nil {
+		dest.lastUsed = time.Now()
+	}
 	ephemeralLock.Unlock()
 
 	if dest == nil {
@@ -111,7 +114,6 @@ func (tun *tunnelCon) readPacket() error {
 		if verboseLog {
 			doLog("wrote %vb to %v", w, dest.destPort)
 		}
-		dest.lastUsed = time.Now()
 	}
 
 	return nil
