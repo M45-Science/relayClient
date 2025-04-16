@@ -40,6 +40,8 @@ func connectHandler() {
 			ephemeralTop = 1
 			ephemeralIDMap = map[int]*ephemeralData{}
 			ephemeralPortMap = map[string]*ephemeralData{}
+			ephemeralIDRecycle = []int{}
+			ephemeralIDRecycleLen = 0
 			ephemeralLock.Unlock()
 			connectTunnel()
 
