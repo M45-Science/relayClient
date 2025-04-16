@@ -17,7 +17,7 @@ func handleListeners(tun *tunnelCon) {
 				buf := make([]byte, bufferSizeUDP)
 				n, addr, err := p.ReadFromUDP(buf)
 				if err != nil {
-					doLog("Error reading:", err)
+					doLog("Error reading: %v", err)
 					return
 				}
 
