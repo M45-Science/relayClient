@@ -38,9 +38,7 @@ func handleListeners(tun *tunnelCon) {
 
 					ephemeralTop++
 					session = newSession
-					if verboseLog {
-						doLog("NEW SESSION ID: %v: %vb: %v -> %v\n", newSession.id, n, newSession.source, newSession.destPort)
-					}
+					doLog("NEW SESSION ID: %v: %vb: %v -> %v\n", newSession.id, n, newSession.source, newSession.destPort)
 				} else {
 					session.lastUsed = time.Now()
 					if verboseLog {
