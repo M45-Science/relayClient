@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -94,18 +93,21 @@ func outputServerList() {
 
 	parsedTemplate, err := template.New("page").Parse(sourceTemplate)
 	if err != nil {
-		log.Fatalf("Failed to parse template: %v", err)
+		doLog("Failed to parse template: %v", err)
+		os.Exit(1)
 	}
 
 	f, err := os.Create(htmlFileName)
 	if err != nil {
-		log.Fatalf("Failed to create file: %v", err)
+		doLog("Failed to create file: %v", err)
+		os.Exit(1)
 	}
 	defer f.Close()
 
 	err = parsedTemplate.Execute(f, data)
 	if err != nil {
-		log.Fatalf("Failed to execute template: %v", err)
+		doLog("Failed to execute template: %v", err)
+		os.Exit(1)
 	}
 
 	doLog("%v written successfully.", htmlFileName)
