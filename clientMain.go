@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
-	"time"
 )
 
 const (
@@ -38,33 +37,6 @@ func main() {
 
 	<-sigs
 	doLog("[QUIT] Server shutting down: Signal: %v", sigs)
-}
-
-func cleanEphemeralMaps() {
-	go func() {
-		ticker := time.NewTicker(ephemeralLife)
-
-		for range ticker.C {
-			ephemeralLock.Lock()
-			for key, item := range ephemeralPortMap {
-				if time.Since(item.lastUsed) > ephemeralLife {
-					if verboseLog {
-						doLog("Deleted idle ephemeral port: %v", key)
-					}
-					delete(ephemeralPortMap, key)
-				}
-			}
-			for key, item := range ephemeralIDMap {
-				if time.Since(item.lastUsed) > ephemeralLife {
-					if verboseLog {
-						doLog("Deleted idle ephemeral id: %v", key)
-					}
-					delete(ephemeralIDMap, key)
-				}
-			}
-			ephemeralLock.Unlock()
-		}
-	}()
 }
 
 const logoANSI = `\e[48;5;0m          \e[48;5;254m  \e[48;5;255m  \e[48;5;243m  \e[48;5;242m  \e[48;5;0m                        \e[m

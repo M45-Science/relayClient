@@ -73,7 +73,10 @@ func readHandshakePacket(tun *tunnelCon) error {
 	}
 	serverID = int(sid)
 
-	doLog("Proto: %v, Compress: %v, Batch: %v, ServerID: %v", proto, compressionLevel, batchingMicroseconds, serverID)
+	if verboseLog {
+		doLog("Proto: %v, Compress: %v, Batch: %v, ServerID: %v", proto, compressionLevel, batchingMicroseconds, serverID)
+	}
+	//doLog("[Connected]")
 
 	//Forwarded port count
 	forwardedPortCount, err := binary.ReadUvarint(tun.frameReader)

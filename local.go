@@ -17,8 +17,14 @@ func handleListeners(tun *tunnelCon) {
 				buf := make([]byte, bufferSizeUDP)
 				n, addr, err := p.ReadFromUDP(buf)
 				if err != nil {
-					doLog("Error reading: %v", err)
+					//doLog("Error reading: %v", err)
 					return
+				}
+				if n == 0 {
+					if verboseLog {
+						doLog("Ignoring empty packet: %v", addr)
+					}
+					continue
 				}
 
 				// Check ephemeral map
@@ -38,11 +44,10 @@ func handleListeners(tun *tunnelCon) {
 
 					ephemeralTop++
 					session = newSession
-					doLog("NEW SESSION ID: %v: %vb: %v -> %v\n", newSession.id, n, newSession.source, newSession.destPort)
+					doLog("NEW SESSION ID: %v: %v -> %v", newSession.id, newSession.source, newSession.destPort)
 				} else {
-					session.lastUsed = time.Now()
 					if verboseLog {
-						doLog("Session ID: %v: %vb: %v -> %v\n", session.id, n, session.source, session.destPort)
+						doLog("Session ID: %v: %vb: %v -> %v", session.id, n, session.source, session.destPort)
 					}
 				}
 				ephemeralLock.Unlock()
@@ -58,6 +63,7 @@ func handleListeners(tun *tunnelCon) {
 				header = binary.AppendUvarint(header, uint64(session.id))
 				header = binary.AppendUvarint(header, uint64(n))
 				tun.Write(append(header, buf[:n]...))
+				session.lastUsed = time.Now()
 			}
 		}(port)
 	}
@@ -70,4 +76,31 @@ func getPortStr(input string) int {
 	portStr := parts[numparts-1]
 	port, _ := strconv.ParseUint(portStr, 10, 64)
 	return int(port)
+}
+
+func cleanEphemeralMaps() {
+	go func() {
+		ticker := time.NewTicker(ephemeralLife)
+
+		for range ticker.C {
+			ephemeralLock.Lock()
+			for key, item := range ephemeralPortMap {
+				if time.Since(item.lastUsed) > ephemeralLife {
+					if verboseLog {
+						doLog("Deleted idle ephemeral port: %v: -> %v", item.id, key)
+					}
+					item.listener.Close()
+					delete(ephemeralPortMap, key)
+				}
+			}
+			for key, item := range ephemeralIDMap {
+				if time.Since(item.lastUsed) > ephemeralLife {
+					doLog("Deleted idle ephemeral id: %v: -> %v", item.id, key)
+					item.listener.Close()
+					delete(ephemeralIDMap, key)
+				}
+			}
+			ephemeralLock.Unlock()
+		}
+	}()
 }

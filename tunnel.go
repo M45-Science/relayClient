@@ -49,7 +49,7 @@ func connectHandler() {
 }
 
 func connectTunnel() {
-	doLog("Connecting to %v...", tunnelServerAddr)
+	doLog("[Connecting] to %v...", tunnelServerAddr)
 	var err error
 	con, err := net.Dial("tcp", tunnelServerAddr)
 	if err != nil {
