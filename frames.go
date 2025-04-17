@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"time"
 )
 
 func frameHandler(tun *tunnelCon) error {
@@ -39,6 +40,8 @@ func (tun *tunnelCon) readFrames() {
 			return
 		}
 	}
+
+	tun.lastUsed = time.Now()
 
 	tun.readFrames()
 }
