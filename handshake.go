@@ -48,7 +48,7 @@ func readHandshakePacket(tun *tunnelCon) error {
 	//Batching Interval
 	bm, err := binary.ReadUvarint(tun.frameReader)
 	if err != nil {
-		return fmt.Errorf("unable to read server id: %v", err)
+		return fmt.Errorf("unable to read batch interval: %v", err)
 	}
 	batchingMicroseconds = int(bm)
 
