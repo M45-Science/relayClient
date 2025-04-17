@@ -14,6 +14,7 @@ func writeHandshakePacket(tun *tunnelCon) {
 }
 
 func readHandshakePacket(tun *tunnelCon) error {
+
 	//Read key
 	key, err := binary.ReadUvarint(tun.frameReader)
 	if err != nil {

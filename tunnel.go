@@ -22,9 +22,9 @@ func tunnelHandler() {
 }
 
 func connectTunnel() {
-	doLog("[Connecting] to %v...", tunnelServerAddr)
+	doLog("[Connecting] to %v...", tunnelServerAddress)
 	var err error
-	con, err := net.Dial("tcp", tunnelServerAddr)
+	con, err := net.Dial("tcp", tunnelServerAddress)
 	if err != nil {
 		doLog("Unable to connect: %v", err)
 		return

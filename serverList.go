@@ -81,7 +81,7 @@ func outputServerList() {
 
 	for i, port := range forwardedPorts {
 		name := forwardedPortsNames[i]
-		server := ServerEntry{Name: name, Addr: clientAddr, Port: port}
+		server := ServerEntry{Name: name, Addr: clientAddress, Port: port}
 		data.Servers = append(data.Servers, server)
 	}
 

@@ -18,10 +18,10 @@ MAIN_GO_FILE="."
 #    then create a universal binary.
 #######################################
 echo "Building for macOS amd64..."
-env GOOS=darwin GOARCH=amd64 go build -ldflags="-X main.PublicClientMode=true" -o "${BINARY_NAME}-amd64" "${MAIN_GO_FILE}"
+env GOOS=darwin GOARCH=amd64 go build -ldflags="-X main.publicClientFlag=true" -o "${BINARY_NAME}-amd64" "${MAIN_GO_FILE}"
 
 echo "Building for macOS arm64..."
-env GOOS=darwin GOARCH=arm64 go build -ldflags="-X main.PublicClientMode=true" -o "${BINARY_NAME}-arm64" "${MAIN_GO_FILE}"
+env GOOS=darwin GOARCH=arm64 go build -ldflags="-X main.publicClientFlag=true" -o "${BINARY_NAME}-arm64" "${MAIN_GO_FILE}"
 
 echo "Combining into universal (fat) binary with lipo..."
 llvm-lipo-14 -create "${BINARY_NAME}-amd64" "${BINARY_NAME}-arm64" -output "${BINARY_NAME}"

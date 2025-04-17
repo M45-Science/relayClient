@@ -26,9 +26,13 @@ const (
 	downloadURL   = "https://m45sci.xyz/eu#downloads"
 )
 
-var htmlFileName = "connect-links.html"
-
-var MaxCompression = len(compressionLevels) - 1
+var (
+	htmlFileName     = "connect-links.html"
+	MaxCompression   = len(compressionLevels) - 1
+	publicMode       bool
+	publicClientFlag string
+	notFirstConnect  bool
+)
 
 var compressionLevels []int = []int{
 	gzip.NoCompression,
@@ -40,13 +44,13 @@ var compressionLevels []int = []int{
 
 var (
 	serverID             int
-	tunnelServerAddr     string
-	clientAddr           string
+	tunnelServerAddress  string
+	clientAddress        string
 	forwardedPorts       []int
 	forwardedPortsNames  []string
 	listeners            []*net.UDPConn
 	batchingMicroseconds int
-	compressionLevel     int = defaultCompression
+	compressionLevel     int = 1
 	reservedValueA       int
 	reservedValueB       int
 
@@ -89,9 +93,4 @@ type ServerEntry struct {
 
 type PageData struct {
 	Servers []ServerEntry
-}
-
-type AddressData struct {
-	ip   string
-	port int
 }
