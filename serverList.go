@@ -86,7 +86,7 @@ func outputServerList() {
 	}
 
 	sourceTemplate := privateServerTemplate
-	if PublicClientMode != "true" {
+	if !publicMode {
 		sourceTemplate = publicServerTemplate
 		htmlFileName = privateIndexFilename
 	}
@@ -112,7 +112,7 @@ func outputServerList() {
 
 	doLog("%v written successfully.", htmlFileName)
 
-	if PublicClientMode == "true" {
+	if publicMode {
 		if err := openInBrowser(htmlFileName); err != nil {
 			doLog("Failed to open in browser: %v", err)
 		}

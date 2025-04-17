@@ -21,6 +21,7 @@ const (
 	ephemeralLife        = time.Minute
 	ephemeralTicker      = time.Second * 15
 	keepAliveInterval    = time.Minute * 4
+	tunIdleTime          = time.Minute
 
 	bufferSizeUDP = 65 * 1024
 	downloadURL   = "https://m45sci.xyz/eu#downloads"
@@ -50,8 +51,7 @@ var (
 	reservedValueA       int
 	reservedValueB       int
 
-	PublicClientMode      string
-	verboseLog, forceHTML bool
+	debugLog, verboseDebug, forceHTML bool
 
 	ephemeralTop          int = 1
 	ephemeralIDRecycle    []int
@@ -72,6 +72,8 @@ type tunnelCon struct {
 	packets       []byte
 	packetsLength int
 	packetLock    sync.Mutex
+
+	lastUsed time.Time
 }
 
 type ephemeralData struct {

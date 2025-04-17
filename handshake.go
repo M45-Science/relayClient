@@ -73,7 +73,7 @@ func readHandshakePacket(tun *tunnelCon) error {
 	}
 	serverID = int(sid)
 
-	if verboseLog {
+	if debugLog {
 		doLog("Proto: %v, Compress: %v, Batch: %v, ServerID: %v", proto, compressionLevel, batchingMicroseconds, serverID)
 	}
 	//doLog("[Connected]")

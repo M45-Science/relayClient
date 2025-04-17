@@ -14,15 +14,28 @@ const (
 	defaultCompression = 1
 )
 
+var (
+	publicMode       bool
+	PublicClientMode string
+)
+
 func main() {
+	//Convert ldflag to bool
+	if PublicClientMode == "true" {
+		publicMode = true
+	}
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 	flag.StringVar(&tunnelServerAddr, "serverAddr", "m45sci.xyz:30000", "server:port")
 	flag.StringVar(&clientAddr, "clientAddr", "127.0.0.1", "address for this proxy")
 	flag.BoolVar(&forceHTML, "openList", false, "Write "+htmlFileName+" and then attempt to open it.")
-	flag.BoolVar(&verboseLog, "verboseLog", false, "debug logging")
+	flag.BoolVar(&debugLog, "debugLog", false, "debug logging")
+	flag.BoolVar(&verboseDebug, "verboseDebug", false, "full debug logging")
 	flag.Parse()
+	if verboseDebug {
+		debugLog = true
+	}
 
 	if enableVirtualTerminalProcessing() == nil {
 		logo := strings.ReplaceAll(logoANSI, "\\e", "\x1b")

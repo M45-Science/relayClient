@@ -35,14 +35,21 @@ func (tun *tunnelCon) batchWriter() {
 	}
 	ticker := time.NewTicker(time.Microsecond * time.Duration(batchingMicroseconds))
 
-	//defer doLog("batchWriter: exit")
+	if debugLog {
+		defer doLog("batchWriter: exit")
+	}
 
 	for range ticker.C {
 		if tun == nil || tun.con == nil {
 			return
 		}
+		if time.Since(tun.lastUsed) > tunIdleTime {
+			tun.delete()
+			return
+		}
 		tun.packetLock.Lock()
 		err := writeBatch(tun)
+		tun.lastUsed = time.Now()
 		tun.packetLock.Unlock()
 		if err != nil {
 			return
@@ -53,13 +60,13 @@ func (tun *tunnelCon) batchWriter() {
 
 func writeBatch(tun *tunnelCon) error {
 	if tun.packetsLength == 0 {
-		if PublicClientMode == "true" {
+		if publicMode {
 			return nil
 		}
 		if time.Since(lastKeepalive) < keepAliveInterval {
 			return nil
 		}
-		if verboseLog {
+		if debugLog {
 			doLog("keepalive sent.")
 		}
 		lastKeepalive = time.Now()
