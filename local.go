@@ -88,11 +88,9 @@ func handleListeners(tun *tunnelCon) {
 						destPort: getPortStr(p.LocalAddr().String()),
 						lastUsed: time.Now(), listener: port}
 
-					if publicMode {
-						if tun.con == nil {
-							doLog("Reconnecting on-demand.")
-							go tunnelConnect()
-						}
+					if tun.con == nil {
+						doLog("Reconnecting on-demand.")
+						go tunnelHandler()
 					}
 
 					ephemeralPortMap[addr.String()] = newSession

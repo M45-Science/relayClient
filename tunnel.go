@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func tunnelConnect() {
+func tunnelHandler() {
 	ephemeralLock.Lock()
 	ephemeralTop = 1
 	ephemeralIDMap = map[int]*ephemeralData{}
@@ -19,18 +19,6 @@ func tunnelConnect() {
 	ephemeralIDRecycleLen = 0
 	ephemeralLock.Unlock()
 	connectTunnel()
-}
-
-func connectHandler() {
-
-	if publicMode {
-		tunnelConnect()
-	} else {
-		for {
-			tunnelConnect()
-			time.Sleep(time.Second * privateReconDelaySec)
-		}
-	}
 }
 
 func connectTunnel() {

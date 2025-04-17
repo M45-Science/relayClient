@@ -46,7 +46,7 @@ func main() {
 	autoRotateLogs()
 	doLog("[START] goRelay client started.")
 
-	go connectHandler()
+	go tunnelHandler()
 	go cleanEphemeralMaps()
 
 	<-sigs
