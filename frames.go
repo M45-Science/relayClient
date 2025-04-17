@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"time"
 )
 
 func frameHandler(tun *tunnelCon) error {
@@ -24,16 +25,23 @@ func frameHandler(tun *tunnelCon) error {
 func (tun *tunnelCon) readFrames() {
 	err := readFrameHeader(tun)
 	if err != nil {
-		//doLog(err.Error())
+		if debugLog {
+			doLog(err.Error())
+		}
 		return
 	}
 
 	for tun.packetReader != nil && tun.packetReader.Len() > 0 {
 		err := tun.readPacket()
 		if err != nil {
+			if debugLog {
+				doLog(err.Error())
+			}
 			return
 		}
 	}
+
+	tun.lastUsed = time.Now()
 
 	tun.readFrames()
 }

@@ -76,15 +76,13 @@ func startLog() {
 
 func autoRotateLogs() {
 	//Rotate when date changes
-	go func() {
-		startDay := time.Now().UTC().Day()
-		for {
-			currentDay := time.Now().UTC().Day()
-			if currentDay != startDay {
-				startDay = currentDay
-				startLog()
-			}
-			time.Sleep(time.Second)
+	startDay := time.Now().UTC().Day()
+	for {
+		currentDay := time.Now().UTC().Day()
+		if currentDay != startDay {
+			startDay = currentDay
+			startLog()
 		}
-	}()
+		time.Sleep(time.Second)
+	}
 }

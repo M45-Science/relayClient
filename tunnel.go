@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sync"
 	"time"
 )
 
-func reconnect() {
+func tunnelHandler() {
 	ephemeralLock.Lock()
 	ephemeralTop = 1
 	ephemeralIDMap = map[int]*ephemeralData{}
@@ -20,50 +21,37 @@ func reconnect() {
 	connectTunnel()
 }
 
-func connectHandler() {
-
-	if PublicClientMode == "true" {
-		lastConnect := time.Now()
-		for attempts := 0; attempts < maxAttempts; attempts++ {
-			if attempts != 0 {
-				time.Sleep(time.Duration(publicReconDelaySec) * time.Second)
-			}
-
-			reconnect()
-
-			//Eventually reset tries
-			if time.Since(lastConnect) > attemptResetAfter {
-				attempts = 0
-			}
-			lastConnect = time.Now()
-		}
-
-		doLog("Too many unsuccsessful connection attempts (%v), stopping.\nQuit then relaunch to try again.", maxAttempts)
-		select {}
-	} else {
-		for {
-			reconnect()
-
-			time.Sleep(time.Second * privateReconDelaySec)
-		}
-	}
-}
-
 func connectTunnel() {
-	doLog("[Connecting] to %v...", tunnelServerAddr)
+	doLog("[Connecting] to %v...", tunnelServerAddress)
 	var err error
-	con, err := net.Dial("tcp", tunnelServerAddr)
+	con, err := net.Dial("tcp", tunnelServerAddress)
 	if err != nil {
 		doLog("Unable to connect: %v", err)
 		return
 	}
 
-	tun := &tunnelCon{con: con, frameReader: bufio.NewReader(con)}
+	tun := &tunnelCon{con: con, frameReader: bufio.NewReader(con), lastUsed: time.Now()}
 	writeHandshakePacket(tun)
 
 	err = frameHandler(tun)
 	if err != nil {
 		doLog("frameHandler: %v", err)
+	}
+	tun.delete(false)
+}
+
+var deleteTunLock sync.Mutex
+
+func (tun *tunnelCon) delete(silent bool) {
+	deleteTunLock.Lock()
+	defer deleteTunLock.Unlock()
+
+	if tun.con != nil {
+		if !silent {
+			doLog("[Disconnected]")
+		}
+		tun.con.Close()
+		tun.con = nil
 	}
 }
 
@@ -112,7 +100,7 @@ func (tun *tunnelCon) readPacket() error {
 		if w != int(payloadLen) {
 			return fmt.Errorf("only wrote %vb of %vb to %v", w, payloadLen, dest.destPort)
 		}
-		if verboseLog {
+		if verboseDebug {
 			doLog("wrote %vb to %v", w, dest.destPort)
 		}
 	}

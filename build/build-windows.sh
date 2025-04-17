@@ -12,7 +12,7 @@ APP_NAME="M45-Relay-Client"
 # 1. Build for Windows (amd64)
 #######################################
 rm -f $APP_NAME
-GOOS=windows GOARCH=amd64 go build -ldflags="-X main.PublicClientMode=true" -o ${APP_NAME}.exe
+GOOS=windows GOARCH=amd64 go build -ldflags="-X main.publicClientFlag=true" -o ${APP_NAME}.exe
 
 #######################################
 # 2. Zip the .exe + readmes

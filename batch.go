@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (tun *tunnelCon) Write(buf []byte) {
+func (tun *tunnelCon) write(buf []byte) {
 	if tun == nil {
 		return
 	}
@@ -35,10 +35,17 @@ func (tun *tunnelCon) batchWriter() {
 	}
 	ticker := time.NewTicker(time.Microsecond * time.Duration(batchingMicroseconds))
 
-	//defer doLog("batchWriter: exit")
+	if debugLog {
+		defer doLog("batchWriter: exit")
+	}
 
 	for range ticker.C {
 		if tun == nil || tun.con == nil {
+			return
+		}
+		if time.Since(tun.lastUsed) > tunIdleTime {
+			doLog("Idle, disconnected")
+			tun.delete(true)
 			return
 		}
 		tun.packetLock.Lock()

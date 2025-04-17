@@ -12,11 +12,15 @@ import (
 	"strconv"
 )
 
-const privateIndexFilename = "index.html"
-
-func handleForwardedPorts(tun *tunnelCon, portCounts int) error {
+func handleForwardedPorts(tun *tunnelCon) error {
 	for _, listener := range listeners {
 		listener.Close()
+	}
+
+	//Forwarded port count
+	portCounts, err := binary.ReadUvarint(tun.frameReader)
+	if err != nil {
+		return fmt.Errorf("unable to read forwarded port count: %v", err)
 	}
 
 	//Build port list data
@@ -81,12 +85,12 @@ func outputServerList() {
 
 	for i, port := range forwardedPorts {
 		name := forwardedPortsNames[i]
-		server := ServerEntry{Name: name, Addr: clientAddr, Port: port}
+		server := ServerEntry{Name: name, Addr: clientAddress, Port: port}
 		data.Servers = append(data.Servers, server)
 	}
 
 	sourceTemplate := privateServerTemplate
-	if PublicClientMode != "true" {
+	if !publicMode {
 		sourceTemplate = publicServerTemplate
 		htmlFileName = privateIndexFilename
 	}
@@ -112,7 +116,7 @@ func outputServerList() {
 
 	doLog("%v written successfully.", htmlFileName)
 
-	if PublicClientMode == "true" {
+	if publicMode {
 		if err := openInBrowser(htmlFileName); err != nil {
 			doLog("Failed to open in browser: %v", err)
 		}
@@ -120,6 +124,11 @@ func outputServerList() {
 }
 
 func openInBrowser(path string) error {
+	if notFirstConnect {
+		return nil
+	}
+	notFirstConnect = true
+
 	var cmd *exec.Cmd
 
 	switch runtime.GOOS {
