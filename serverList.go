@@ -12,11 +12,15 @@ import (
 	"strconv"
 )
 
-const privateIndexFilename = "index.html"
-
-func handleForwardedPorts(tun *tunnelCon, portCounts int) error {
+func handleForwardedPorts(tun *tunnelCon) error {
 	for _, listener := range listeners {
 		listener.Close()
+	}
+
+	//Forwarded port count
+	portCounts, err := binary.ReadUvarint(tun.frameReader)
+	if err != nil {
+		return fmt.Errorf("unable to read forwarded port count: %v", err)
 	}
 
 	//Build port list data
