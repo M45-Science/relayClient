@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (tun *tunnelCon) Write(buf []byte) {
+func (tun *tunnelCon) write(buf []byte) {
 	if tun == nil {
 		return
 	}

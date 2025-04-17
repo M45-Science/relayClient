@@ -116,7 +116,7 @@ func handleListeners(tun *tunnelCon) {
 				//Write standard header
 				header = binary.AppendUvarint(header, uint64(session.id))
 				header = binary.AppendUvarint(header, uint64(n))
-				tun.Write(append(header, buf[:n]...))
+				tun.write(append(header, buf[:n]...))
 			}
 		}(port)
 	}
