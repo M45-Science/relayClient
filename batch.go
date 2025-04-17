@@ -53,7 +53,16 @@ func (tun *tunnelCon) batchWriter() {
 
 func writeBatch(tun *tunnelCon) error {
 	if tun.packetsLength == 0 {
-		return nil
+		if PublicClientMode == "true" {
+			return nil
+		}
+		if time.Since(lastKeepalive) < keepAliveInterval {
+			return nil
+		}
+		if verboseLog {
+			doLog("keepalive sent.")
+		}
+		lastKeepalive = time.Now()
 	}
 
 	var dataToWrite []byte

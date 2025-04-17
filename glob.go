@@ -20,6 +20,7 @@ const (
 	attemptResetAfter    = time.Minute * 5
 	ephemeralLife        = time.Minute
 	ephemeralTicker      = time.Second * 15
+	keepAliveInterval    = time.Minute * 4
 
 	bufferSizeUDP = 65 * 1024
 	downloadURL   = "https://m45sci.xyz/eu#downloads"
@@ -59,6 +60,8 @@ var (
 	ephemeralIDMap   map[int]*ephemeralData    = map[int]*ephemeralData{}
 	ephemeralPortMap map[string]*ephemeralData = map[string]*ephemeralData{}
 	ephemeralLock    sync.Mutex
+
+	lastKeepalive time.Time
 )
 
 type tunnelCon struct {
