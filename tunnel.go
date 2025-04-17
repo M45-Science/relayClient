@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -48,13 +49,22 @@ func connectTunnel() {
 	if err != nil {
 		doLog("frameHandler: %v", err)
 	}
-	tun.delete()
+	tun.delete(false)
 }
 
-func (tun *tunnelCon) delete() {
-	doLog("[Disconnected]")
-	tun.con.Close()
-	tun.con = nil
+var deleteTunLock sync.Mutex
+
+func (tun *tunnelCon) delete(silent bool) {
+	deleteTunLock.Lock()
+	defer deleteTunLock.Unlock()
+
+	if tun.con != nil {
+		if !silent {
+			doLog("[Disconnected]")
+		}
+		tun.con.Close()
+		tun.con = nil
+	}
 }
 
 func (tun *tunnelCon) readPacket() error {

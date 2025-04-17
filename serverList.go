@@ -120,6 +120,11 @@ func outputServerList() {
 }
 
 func openInBrowser(path string) error {
+	if notFirstConnect {
+		return nil
+	}
+	notFirstConnect = true
+
 	var cmd *exec.Cmd
 
 	switch runtime.GOOS {

@@ -17,6 +17,7 @@ const (
 var (
 	publicMode       bool
 	PublicClientMode string
+	notFirstConnect  bool
 )
 
 func main() {

@@ -43,13 +43,13 @@ func (tun *tunnelCon) batchWriter() {
 		if tun == nil || tun.con == nil {
 			return
 		}
-		if time.Since(tun.lastUsed) > tunIdleTime {
-			tun.delete()
+		if publicMode && time.Since(tun.lastUsed) > tunIdleTime {
+			doLog("Idle, disconnected")
+			tun.delete(true)
 			return
 		}
 		tun.packetLock.Lock()
 		err := writeBatch(tun)
-		tun.lastUsed = time.Now()
 		tun.packetLock.Unlock()
 		if err != nil {
 			return
@@ -70,6 +70,8 @@ func writeBatch(tun *tunnelCon) error {
 			doLog("keepalive sent.")
 		}
 		lastKeepalive = time.Now()
+	} else {
+		tun.lastUsed = time.Now()
 	}
 
 	var dataToWrite []byte
