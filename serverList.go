@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"html/template"
 	"io"
 	"net"
 	"os"
@@ -89,16 +88,11 @@ func outputServerList() {
 		data.Servers = append(data.Servers, server)
 	}
 
-	sourceTemplate := privateServerTemplate
-	if !publicMode {
-		sourceTemplate = publicServerTemplate
-		htmlFileName = privateIndexFilename
-	}
-
-	parsedTemplate, err := template.New("page").Parse(sourceTemplate)
-	if err != nil {
-		doLog("Failed to parse template: %v", err)
-		os.Exit(1)
+	htmlFileName := privateIndexFilename
+	parsedTemplate := privateServerTemplate
+	if publicMode {
+		parsedTemplate = publicServerTemplate
+		htmlFileName = publicIndexFilename
 	}
 
 	f, err := os.Create(htmlFileName)

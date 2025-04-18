@@ -18,13 +18,11 @@ const (
 	ephemeralTicker      = time.Second * 15
 	tunIdleTime          = time.Minute
 
-	bufferSizeUDP        = 65 * 1024
-	downloadURL          = "https://m45sci.xyz/eu#downloads"
-	privateIndexFilename = "index.html"
+	bufferSizeUDP = 65 * 1024
+	downloadURL   = "https://m45sci.xyz/eu#downloads"
 )
 
 var (
-	htmlFileName   = "connect-links.html"
 	MaxCompression = len(compressionLevels) - 1
 )
 
