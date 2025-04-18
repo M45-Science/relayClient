@@ -43,7 +43,7 @@ func (tun *tunnelCon) batchWriter() {
 		if tun == nil || tun.con == nil {
 			return
 		}
-		if time.Since(tun.lastUsed) > tunIdleTime {
+		if time.Since(tun.lastUsed) > tunnelLife {
 			doLog("Idle, disconnected")
 			tun.delete(true)
 			return

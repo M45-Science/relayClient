@@ -12,11 +12,13 @@ const (
 
 	publicReconDelaySec  = 2
 	privateReconDelaySec = 5
-	maxAttempts          = 60 / publicReconDelaySec
-	attemptResetAfter    = time.Minute * 5
-	ephemeralLife        = time.Minute
-	ephemeralTicker      = time.Second * 15
-	tunIdleTime          = time.Minute
+
+	ephemeralLife   = time.Minute
+	ephemeralTicker = time.Second * 15
+
+	maxAttempts       = 60 / publicReconDelaySec
+	attemptResetAfter = time.Minute * 5
+	tunnelLife        = time.Minute
 
 	bufferSizeUDP = 65 * 1024
 	downloadURL   = "https://m45sci.xyz/eu#downloads"
