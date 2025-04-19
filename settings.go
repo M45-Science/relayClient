@@ -22,6 +22,7 @@ const (
 
 	bufferSizeUDP = 65 * 1024
 	downloadURL   = "https://m45sci.xyz/eu#downloads"
+	updateLink    = "https://m45sci.xyz/relayClient.json"
 )
 
 var (
