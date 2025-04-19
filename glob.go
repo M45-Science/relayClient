@@ -29,5 +29,6 @@ var (
 
 	publicMode       bool
 	publicClientFlag string
+	version          string
 	notFirstConnect  bool
 )

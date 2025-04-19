@@ -2,20 +2,13 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
-
-	_, err := CheckUpdate()
-	if err != nil {
-		fmt.Println(err)
-	}
-	return
-
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
@@ -31,6 +24,11 @@ func main() {
 	if publicClientFlag == "true" {
 		//Convert ldflag to bool
 		publicMode = true
+	}
+
+	_, err := CheckUpdate()
+	if err != nil {
+		log.Println(err)
 	}
 
 	startLog()
