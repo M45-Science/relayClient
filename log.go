@@ -15,10 +15,6 @@ var (
 
 func doLog(format string, args ...any) {
 
-	if logDesc == nil {
-		return
-	}
-
 	ctime := time.Now()
 	_, filename, line, _ := runtime.Caller(1)
 
@@ -27,6 +23,11 @@ func doLog(format string, args ...any) {
 		text = format
 	} else {
 		text = fmt.Sprintf(format, args...)
+	}
+
+	if logDesc == nil {
+		fmt.Println(text)
+		return
 	}
 
 	date := fmt.Sprintf("%2v:%2v.%2v", ctime.Hour(), ctime.Minute(), ctime.Second())
