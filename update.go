@@ -134,7 +134,7 @@ func CheckUpdate() (bool, error) {
 	}
 }
 
-// relaunch replaces the current process with a new instance of the same binary.
+// relaunch replaces the current process with update_binary (or update_binary.exe).
 // It never returns on success; on failure it returns an error.
 func relaunch() error {
 	// 1) Find the path to the currently running executable
@@ -143,14 +143,25 @@ func relaunch() error {
 		return fmt.Errorf("cannot find executable path: %w", err)
 	}
 
-	// 2) Grab the original args (including os.Args[0]) so the new process is identical
+	// 2) Compute the new binary name in the same dir
+	dir := filepath.Dir(exePath)
+	ext := filepath.Ext(exePath) // e.g. ".exe" on Windows, "" elsewhere
+	newName := "update_binary" + ext
+	newPath := filepath.Join(dir, newName)
+
+	// Optional: verify the file exists
+	if _, err := os.Stat(newPath); err != nil {
+		return fmt.Errorf("update binary not found at %q: %w", newPath, err)
+	}
+
+	// 3) Grab the original args (including os.Args[0]) so the new process is identical
 	args := os.Args
 
-	// 3) Inherit the current environment
+	// 4) Inherit the current environment
 	env := os.Environ()
 
-	// 4) Exec – on success this never returns, as the Go runtime is replaced
-	return syscall.Exec(exePath, args, env)
+	// 5) Exec – on success this never returns, as the Go runtime is replaced
+	return syscall.Exec(newPath, args, env)
 }
 
 func computeChecksum(data []byte) (string, error) {
@@ -257,6 +268,8 @@ func UnzipToExeDir(data []byte) error {
 }
 
 // UnzipToDir unpacks the zip archive in data into destDir, preserving folders and file modes.
+// Any entry whose base name is "M45-Relay-Client" or "M45-Relay-Client.exe" will be
+// written as "update_binary" plus the same extension (e.g. ".exe") if present.
 func UnzipToDir(data []byte, destDir string) error {
 	// open zip reader
 	r, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
@@ -265,7 +278,17 @@ func UnzipToDir(data []byte, destDir string) error {
 	}
 
 	for _, f := range r.File {
-		targetPath := filepath.Join(destDir, f.Name)
+		// original path components in the zip
+		origDir, origName := filepath.Split(f.Name)
+
+		// determine new filename (rename special cases)
+		newName := origName
+		if origName == "M45-Relay-Client" || origName == "M45-Relay-Client.exe" {
+			ext := filepath.Ext(origName)   // e.g. ".exe" or ""
+			newName = "update_binary" + ext // preserve extension
+		}
+
+		targetPath := filepath.Join(destDir, origDir, newName)
 
 		if f.FileInfo().IsDir() {
 			// create sub‑directory
@@ -276,8 +299,9 @@ func UnzipToDir(data []byte, destDir string) error {
 		}
 
 		// make sure parent dir exists
-		if err := os.MkdirAll(filepath.Dir(targetPath), os.ModePerm); err != nil {
-			return fmt.Errorf("mkdirall %q: %w", filepath.Dir(targetPath), err)
+		parentDir := filepath.Dir(targetPath)
+		if err := os.MkdirAll(parentDir, os.ModePerm); err != nil {
+			return fmt.Errorf("mkdirall %q: %w", parentDir, err)
 		}
 
 		// open file inside zip
@@ -287,13 +311,8 @@ func UnzipToDir(data []byte, destDir string) error {
 		}
 		defer inFile.Close()
 
-		// delete old file
-		if err := os.Remove(targetPath); err != nil {
-			return fmt.Errorf("deleting %q: %w", targetPath, err)
-		}
-
 		// create destination file
-		outFile, err := os.OpenFile(targetPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, f.Mode())
+		outFile, err := os.OpenFile(targetPath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, f.Mode())
 		if err != nil {
 			return fmt.Errorf("open file %q: %w", targetPath, err)
 		}
