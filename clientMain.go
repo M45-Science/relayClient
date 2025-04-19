@@ -2,12 +2,20 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 )
 
 func main() {
+	err := restoreBinaryName()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
@@ -30,7 +38,7 @@ func main() {
 	showANSILogo()
 	doLog("[START] goRelay client started.")
 
-	_, err := CheckUpdate()
+	_, err = CheckUpdate()
 	if err != nil {
 		doLog("CheckUpdate: %v", err)
 	}
@@ -40,4 +48,35 @@ func main() {
 
 	<-sigs
 	doLog("[QUIT] relayClient Shutting down.")
+}
+
+func restoreBinaryName() error {
+	// 1) Locate current executable
+	exePath, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("cannot find executable path: %w", err)
+	}
+	dir := filepath.Dir(exePath)
+	base := filepath.Base(exePath) // e.g. "update_binary.exe" or "myprog"
+	ext := filepath.Ext(base)      // e.g. ".exe" or ""
+
+	// 2) Check if it's the updater name
+	nameOnly := strings.TrimSuffix(base, ext)
+	if nameOnly != "update_binary" {
+		// nothing to do
+		fmt.Println("not an update")
+		return nil
+	}
+
+	// 3) Compute the target name
+	targetName := "M45-Relay-Client" + ext
+	targetPath := filepath.Join(dir, targetName)
+
+	// 4) Perform rename
+	if err := os.Rename(exePath, targetPath); err != nil {
+		return fmt.Errorf("failed to rename %q to %q: %w", exePath, targetPath, err)
+	}
+
+	fmt.Println("binary renamed")
+	return nil
 }
