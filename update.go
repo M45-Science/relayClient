@@ -287,6 +287,11 @@ func UnzipToDir(data []byte, destDir string) error {
 		}
 		defer inFile.Close()
 
+		// delete old file
+		if err := os.Remove(targetPath); err != nil {
+			return fmt.Errorf("deleting %q: %w", targetPath, err)
+		}
+
 		// create destination file
 		outFile, err := os.OpenFile(targetPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, f.Mode())
 		if err != nil {
