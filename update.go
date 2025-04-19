@@ -11,6 +11,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
+	"path"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -109,7 +111,7 @@ func CheckUpdate() (bool, error) {
 	if updateLink == nil {
 		return false, fmt.Errorf("No valid download link found")
 	} else {
-		doLog("Downloading: %v\n", baseURL+updateLink.Link)
+		doLog("Downloading: %v\n", path.Base(updateLink.Link))
 		data, fileName, err := httpGet(baseURL + updateLink.Link)
 		if err != nil {
 			return false, fmt.Errorf("httpGet: %v", err)
@@ -128,10 +130,12 @@ func CheckUpdate() (bool, error) {
 			}
 			doLog("Update complete, restarting.")
 			relaunch()
+			return true, nil
 		}
 
-		return true, nil
 	}
+
+	return false, nil
 }
 
 // relaunch replaces the current process with update_binary (or update_binary.exe).
@@ -145,22 +149,41 @@ func relaunch() error {
 
 	// 2) Compute the new binary name in the same dir
 	dir := filepath.Dir(exePath)
-	ext := filepath.Ext(exePath) // e.g. ".exe" on Windows, "" elsewhere
+	ext := filepath.Ext(exePath) // ".exe" on Windows, "" elsewhere
 	newName := "update_binary" + ext
 	newPath := filepath.Join(dir, newName)
 
-	// Optional: verify the file exists
+	// 3) Verify the file exists
 	if _, err := os.Stat(newPath); err != nil {
 		return fmt.Errorf("update binary not found at %q: %w", newPath, err)
 	}
 
-	// 3) Grab the original args (including os.Args[0]) so the new process is identical
+	// 4) Grab the original args (including os.Args[0])
 	args := os.Args
+	//    On Windows exec.Command wants args[1:], on Unix Exec wants the full slice
+	argsForSpawn := args[1:]
 
-	// 4) Inherit the current environment
+	// 5) Inherit the current environment
 	env := os.Environ()
 
-	// 5) Exec – on success this never returns, as the Go runtime is replaced
+	if runtime.GOOS == "windows" {
+		// Windows: spawn a new process and exit this one
+		cmd := exec.Command(newPath, argsForSpawn...)
+		cmd.Env = env
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+
+		if err := cmd.Start(); err != nil {
+			return fmt.Errorf("failed to start updater: %w", err)
+		}
+		// Kill ourselves so that only the updater remains
+		os.Exit(0)
+		// unreachable
+		return nil
+	}
+
+	// Unix (Linux, macOS, etc.): replace the current process
 	return syscall.Exec(newPath, args, env)
 }
 

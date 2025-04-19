@@ -41,9 +41,13 @@ func main() {
 	showANSILogo()
 	doLog("[START] goRelay client started.")
 
-	_, err := CheckUpdate()
+	didUpdate, err := CheckUpdate()
 	if err != nil {
 		doLog("CheckUpdate: %v", err)
+	}
+
+	if didUpdate {
+		os.Exit(0)
 	}
 
 	go tunnelHandler()
