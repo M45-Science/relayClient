@@ -52,6 +52,10 @@ func OSString() (string, error) {
 }
 
 func CheckUpdate() (bool, error) {
+	ourVersion, err := semver.NewVersion(version)
+	if err != nil {
+		return false, fmt.Errorf("This is not published build, not checking for update.")
+	}
 	doLog("Checking for relayClient updates.")
 	jsonBytes, fileName, err := httpGet(UpdateJSON)
 	if err != nil {
@@ -78,10 +82,6 @@ func CheckUpdate() (bool, error) {
 		return false, fmt.Errorf("NewestEntry: %v", err)
 	}
 
-	ourVersion, err := semver.NewVersion(version)
-	if err != nil {
-		return false, fmt.Errorf("NewVersion: %v", err)
-	}
 	remoteVersion, err := semver.NewVersion(remoteNewest.Version)
 	if err != nil {
 		return false, fmt.Errorf("NewVersion: %v", err)
