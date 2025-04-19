@@ -54,7 +54,7 @@ func init() {
 	}
 
 	//Login logo ANSI
-	logoANSI, err = os.ReadFile(tmplDir + logoFile)
+	logoANSI, err = templateFiles.ReadFile(tmplDir + logoFile)
 	if err != nil {
 		doLog("failed to read %s: %v", logoFile, err)
 		os.Exit(1)
