@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -26,15 +25,15 @@ func main() {
 		publicMode = true
 	}
 
-	_, err := CheckUpdate()
-	if err != nil {
-		log.Println(err)
-	}
-
 	startLog()
 	go autoRotateLogs()
 	showANSILogo()
 	doLog("[START] goRelay client started.")
+
+	_, err := CheckUpdate()
+	if err != nil {
+		doLog("CheckUpdate: %v", err)
+	}
 
 	go tunnelHandler()
 	go cleanEphemeralMaps()

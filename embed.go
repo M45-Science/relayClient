@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"log"
 	"os"
 	"text/template"
 )
@@ -31,29 +30,34 @@ func init() {
 	//Public template
 	content, err := templateFiles.ReadFile(tmplDir + publicTemplateName)
 	if err != nil {
-		log.Fatalf("failed to read embedded template %s: %v", publicTemplateName, err)
+		doLog("failed to read embedded template %s: %v", publicTemplateName, err)
+		os.Exit(1)
 	}
 
 	publicServerTemplate, err = template.New("page").Parse(string(content))
 	if err != nil {
-		log.Fatalf("failed to parse template %s: %v", publicTemplateName, err)
+		doLog("failed to parse template %s: %v", publicTemplateName, err)
+		os.Exit(1)
 	}
 
 	//Private template
 	content, err = templateFiles.ReadFile(tmplDir + privateTemplateName)
 	if err != nil {
-		log.Fatalf("failed to read embedded template %s: %v", privateTemplateName, err)
+		doLog("failed to read embedded template %s: %v", privateTemplateName, err)
+		os.Exit(1)
 	}
 
 	privateServerTemplate, err = template.New("page").Parse(string(content))
 	if err != nil {
-		log.Fatalf("failed to parse template %s: %v", privateTemplateName, err)
+		doLog("failed to parse template %s: %v", privateTemplateName, err)
+		os.Exit(1)
 	}
 
 	//Login logo ANSI
 	logoANSI, err = os.ReadFile(tmplDir + logoFile)
 	if err != nil {
-		log.Fatalf("failed to read %s: %v", logoFile, err)
+		doLog("failed to read %s: %v", logoFile, err)
+		os.Exit(1)
 	}
 
 }

@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -53,7 +52,7 @@ func OSString() (string, error) {
 }
 
 func CheckUpdate() (bool, error) {
-	log.Print("Checking for relayClient updates.")
+	doLog("Checking for relayClient updates.")
 	jsonBytes, fileName, err := httpGet(UpdateJSON)
 	if err != nil {
 		return false, err
@@ -63,14 +62,14 @@ func CheckUpdate() (bool, error) {
 		return false, fmt.Errorf("empty response")
 	}
 	if updateDebug {
-		log.Printf("len: %v, name: %v\n", len(jsonBytes), fileName)
+		doLog("len: %v, name: %v\n", len(jsonBytes), fileName)
 	}
 
 	jsonReader := bytes.NewReader(jsonBytes)
 	decoder := json.NewDecoder(jsonReader)
 	entries := []Entry{}
 	if err := decoder.Decode(&entries); err != nil && err != io.EOF {
-		log.Printf("error decoding json: %v\n", err)
+		doLog("error decoding json: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -80,13 +79,19 @@ func CheckUpdate() (bool, error) {
 	}
 
 	ourVersion, err := semver.NewVersion(version)
+	if err != nil {
+		return false, fmt.Errorf("NewVersion: %v", err)
+	}
 	remoteVersion, err := semver.NewVersion(remoteNewest.Version)
+	if err != nil {
+		return false, fmt.Errorf("NewVersion: %v", err)
+	}
 	if !ourVersion.LessThan(remoteVersion) {
-		log.Print("clientRelay is update to date.")
+		doLog("clientRelay is update to date.")
 		return false, nil
 	}
 
-	log.Printf("Found new version: %v\n", remoteNewest.Version)
+	doLog("Found new version: %v\n", remoteNewest.Version)
 
 	goos, err := OSString()
 	if err != nil {
@@ -104,23 +109,24 @@ func CheckUpdate() (bool, error) {
 	if updateLink == nil {
 		return false, fmt.Errorf("No valid download link found")
 	} else {
-		log.Printf("Downloading: %v\n", baseURL+updateLink.Link)
+		doLog("Downloading: %v\n", baseURL+updateLink.Link)
 		data, fileName, err := httpGet(baseURL + updateLink.Link)
 		if err != nil {
 			return false, fmt.Errorf("httpGet: %v", err)
 		}
 		if updateDebug {
-			log.Printf("Filename: %v, Size: %vb\n", fileName, len(data))
+			doLog("Filename: %v, Size: %vb\n", fileName, len(data))
 		}
 		checksum, err := computeChecksum(data)
 		if checksum != updateLink.Checksum {
 			return false, fmt.Errorf("file: %v - checksum is invalid.", fileName)
 		} else {
-			log.Print("Download complete, updating.")
+			doLog("Download complete, updating.")
 			if err := UnzipToExeDir(data); err != nil {
-				log.Fatalf("Extraction failed: %v\n", err)
+				doLog("Extraction failed: %v\n", err)
+				os.Exit(1)
 			}
-			log.Printf("Update complete, restarting.")
+			doLog("Update complete, restarting.")
 			relaunch()
 		}
 
