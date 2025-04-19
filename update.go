@@ -25,12 +25,12 @@ const (
 
 type downloadInfo struct {
 	Link     string `json:"link"`
-	Checksum string `json:"checksum"`
+	Checksum string `json:"sha256"`
 }
 
 type Entry struct {
 	Version string         `json:"version"`
-	Date    time.Time      `json:"date"`
+	Date    int64          `json:"utc-unixnano"`
 	Links   []downloadInfo `json:"links"`
 }
 
