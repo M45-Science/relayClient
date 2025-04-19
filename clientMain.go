@@ -8,13 +8,16 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+	"time"
 )
 
 func main() {
-	err := restoreBinaryName()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	go func() {
+		err := restoreBinaryName()
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	}()
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -38,7 +41,7 @@ func main() {
 	showANSILogo()
 	doLog("[START] goRelay client started.")
 
-	_, err = CheckUpdate()
+	_, err := CheckUpdate()
 	if err != nil {
 		doLog("CheckUpdate: %v", err)
 	}
@@ -72,11 +75,13 @@ func restoreBinaryName() error {
 	targetName := "M45-Relay-Client" + ext
 	targetPath := filepath.Join(dir, targetName)
 
+	// Sleep, just in case
+	time.Sleep(time.Second * 2)
+
 	// 4) Perform rename
 	if err := os.Rename(exePath, targetPath); err != nil {
 		return fmt.Errorf("failed to rename %q to %q: %w", exePath, targetPath, err)
 	}
 
-	fmt.Println("binary renamed")
 	return nil
 }
