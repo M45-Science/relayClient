@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,11 +23,15 @@ const (
 	UpdateJSON = "https://m45sci.xyz/relayClient/relayClient.json"
 )
 
-type UpdateEntry struct {
-	Version   string            `json:"version"`
-	Date      time.Time         `json:"date"`
-	Links     []string          `json:"links"`
-	Checksums map[string]string `json:"checksums,omitempty"`
+type downloadInfo struct {
+	Link     string `json:"link"`
+	Checksum string `json:"checksum"`
+}
+
+type Entry struct {
+	Version string         `json:"version"`
+	Date    time.Time      `json:"date"`
+	Links   []downloadInfo `json:"links"`
 }
 
 func OSString() (string, error) {
@@ -54,7 +60,7 @@ func CheckUpdate() (bool, error) {
 
 	jsonReader := bytes.NewReader(jsonBytes)
 	decoder := json.NewDecoder(jsonReader)
-	entries := []UpdateEntry{}
+	entries := []Entry{}
 	if err := decoder.Decode(&entries); err != nil && err != io.EOF {
 		fmt.Fprintf(os.Stderr, "Error decoding JSON: %v\n", err)
 		os.Exit(1)
@@ -71,26 +77,42 @@ func CheckUpdate() (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("OSString: %v", err)
 	}
-	dlLink := ""
+	var updateLink *downloadInfo
 	for _, link := range newest.Links {
 		if strings.Contains(
-			strings.ToLower(link),
+			strings.ToLower(link.Link),
 			strings.ToLower("-"+goos+"-")) {
-			dlLink = link
+			updateLink = &link
 			break
 		}
 	}
-	if dlLink == "" {
+	if updateLink == nil {
 		return false, fmt.Errorf("No valid download link found")
 	} else {
-		fmt.Printf("Downloading: %v\n", baseURL+dlLink)
-		data, fileName, err := httpGet(baseURL + dlLink)
+		fmt.Printf("Downloading: %v\n", baseURL+updateLink.Link)
+		data, fileName, err := httpGet(baseURL + updateLink.Link)
 		if err != nil {
 			return false, fmt.Errorf("httpGet: %v", err)
 		}
-		fmt.Printf("Filename: %v, Size: %vb", fileName, len(data))
+		fmt.Printf("Filename: %v, Size: %vb\n", fileName, len(data))
+		checksum, err := computeChecksum(data)
+		if checksum != updateLink.Checksum {
+			return false, fmt.Errorf("File %v checksum is invalid.", fileName)
+		} else {
+			fmt.Printf("File %v checksum is valid.\n", fileName)
+		}
+
 		return true, nil
 	}
+}
+
+func computeChecksum(data []byte) (string, error) {
+	dataReader := bytes.NewReader(data)
+	h := sha256.New()
+	if _, err := io.Copy(h, dataReader); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 func httpGet(input string) ([]byte, string, error) {
@@ -146,10 +168,10 @@ func httpGet(input string) ([]byte, string, error) {
 	return body, parts[0], nil
 }
 
-func NewestEntry(entries []UpdateEntry) (*UpdateEntry, error) {
+func NewestEntry(entries []Entry) (*Entry, error) {
 	// pair up each Entry with its parsed semver.Version
 	type pair struct {
-		e   *UpdateEntry
+		e   *Entry
 		ver *semver.Version
 	}
 	var pairs []pair

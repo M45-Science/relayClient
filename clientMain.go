@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -9,13 +10,11 @@ import (
 
 func main() {
 
-	/*
-		_, err := CheckUpdate()
-		if err != nil {
-			fmt.Println(err)
-		}
-		return
-	*/
+	_, err := CheckUpdate()
+	if err != nil {
+		fmt.Println(err)
+	}
+	return
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
