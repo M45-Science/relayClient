@@ -39,7 +39,7 @@ func main() {
 	startLog()
 	go autoRotateLogs()
 	showANSILogo()
-	doLog("[START] goRelay client started.")
+	doLog("[START] goRelay client started: %v", version)
 
 	if publicMode {
 		didUpdate, err := CheckUpdate()
