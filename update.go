@@ -137,10 +137,7 @@ func CheckUpdate() (bool, error) {
 			relaunch()
 			return true, nil
 		}
-
 	}
-
-	return false, nil
 }
 
 // relaunch replaces the current process with update_binary (or update_binary.exe).
@@ -201,14 +198,11 @@ func computeChecksum(data []byte) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func httpGet(input string) ([]byte, string, error) {
+func httpGet(URL string) ([]byte, string, error) {
 	// Set timeout
 	hClient := http.Client{
 		Timeout: time.Second * 30,
 	}
-
-	//Use proxy if provided
-	var URL string = input
 
 	//HTTP GET
 	req, err := http.NewRequest(http.MethodGet, URL, nil)
