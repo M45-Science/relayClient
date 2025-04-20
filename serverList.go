@@ -125,7 +125,7 @@ func openInBrowser(path string) error {
 
 	var cmd *exec.Cmd
 
-	doLog("Opening link: ", path)
+	doLog("Opening link: %v", path)
 
 	switch runtime.GOOS {
 	case "windows":
