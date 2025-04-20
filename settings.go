@@ -21,9 +21,8 @@ const (
 	tunnelLife        = time.Minute
 
 	bufferSizeUDP = 65 * 1024
-	domain        = "https://m45sci.xyz/"
-	downloadURL   = domain + "eu#downloads"
-	updateLink    = domain + "relayClient.json"
+	downloadURL   = "http://eu.m45sci.xyz/#downloads"
+	updateLink    = "https://m45sci.xyz/relayClient.json"
 )
 
 var (
