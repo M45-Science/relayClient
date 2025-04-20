@@ -111,6 +111,11 @@ func CheckUpdate() (bool, error) {
 	if updateLink == nil {
 		return false, fmt.Errorf("No valid download link found")
 	} else {
+		//Mac version can not update without being signed.
+		if strings.EqualFold(goos, "mac") {
+			openInBrowser(downloadURL)
+			return false, nil
+		}
 		doLog("Downloading: %v\n", path.Base(updateLink.Link))
 		data, fileName, err := httpGet(baseURL + updateLink.Link)
 		if err != nil {
