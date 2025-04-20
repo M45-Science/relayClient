@@ -1,17 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-#######################################
-# wrapper.sh
-#
-# Usage:
-#   # from project root
-#   ./wrapper.sh v1.2.3
-#
-#   # or from inside build/
-#   ../build/wrapper.sh v1.2.3
-#######################################
-
 go clean
 rm *.zip || true
 
