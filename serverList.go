@@ -125,6 +125,8 @@ func openInBrowser(path string) error {
 
 	var cmd *exec.Cmd
 
+	doLog("Opening link: ", path)
+
 	switch runtime.GOOS {
 	case "windows":
 		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", path)
