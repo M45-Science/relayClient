@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu pipefail
+set -euo pipefail
 
 #######################################
 # build_windows.sh

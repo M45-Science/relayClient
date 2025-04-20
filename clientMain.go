@@ -71,7 +71,7 @@ func restoreBinaryName() error {
 	nameOnly := strings.TrimSuffix(base, ext)
 	if nameOnly != "update_binary" {
 		// nothing to do
-		fmt.Println("not an update")
+		//fmt.Println("not an update")
 		return nil
 	}
 

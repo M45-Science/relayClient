@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu pipefail
+set -euo pipefail
 
 #######################################
 # wrapper.sh
@@ -11,6 +11,9 @@ set -eu pipefail
 #   # or from inside build/
 #   ../build/wrapper.sh v1.2.3
 #######################################
+
+go clean
+rm *.zip || true
 
 # 1. Locate the directory this script resides in
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
