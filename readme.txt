@@ -1,3 +1,5 @@
+# Motivation: A TCP tunnel greatly helps Factorio networking performance in high-latency and / or packet-loss conditions (common intercontinental issue)
+
 M45 RELAY CLIENT INSTRUCTIONS
 =============================
 
