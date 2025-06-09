@@ -30,10 +30,11 @@ func (tun *tunnelCon) write(buf []byte) {
 }
 
 func (tun *tunnelCon) batchWriter() {
-	if batchingMicroseconds == 0 {
-		return
+	interval := time.Second
+	if batchingMicroseconds > 0 {
+		interval = time.Microsecond * time.Duration(batchingMicroseconds)
 	}
-	ticker := time.NewTicker(time.Microsecond * time.Duration(batchingMicroseconds))
+	ticker := time.NewTicker(interval)
 
 	if debugLog {
 		defer doLog("batchWriter: exit")
