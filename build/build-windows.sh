@@ -21,9 +21,10 @@ VERSION="$1"
 # Variables (edit as needed)
 #######################################
 APP_NAME="M45-Relay-Client"
-PFX_FILE="selfsigned.pfx"
-PFX_PASS="changeit"
-CERT_CN="M45 Relay Client (Self‑Signed)"
+CERT_FILE="certs/fullchain.pem"
+KEY_FILE="certs/privkey.pem"
+KEY_PASS=""
+CERT_CN="M45 Relay Client"
 TIMESTAMP_URL=""  # e.g. "http://timestamp.digicert.com" if you want a timestamp
 
 #######################################
@@ -39,34 +40,16 @@ GOOS=windows GOARCH=amd64 go build \
   -o "${UNSIGNED_EXE}"
 
 #######################################
-# 2. Ensure self‑signed cert/PFX exists
+# 2. Ensure Let's Encrypt certificate exists
 #######################################
-if ! command -v openssl >/dev/null 2>&1; then
-  echo "Error: openssl not found in PATH" >&2
-  exit 1
-fi
 if ! command -v osslsigncode >/dev/null 2>&1; then
   echo "Error: osslsigncode not found in PATH" >&2
   exit 1
 fi
 
-if [[ ! -f "${PFX_FILE}" ]]; then
-  echo "==> Generating self‑signed certificate and PFX"
-  # create key + cert
-  openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -subj "/CN=${CERT_CN}" \
-    -keyout cert.key \
-    -out cert.pem
-
-  # bundle into PFX
-  openssl pkcs12 -export \
-    -inkey cert.key \
-    -in cert.pem \
-    -out "${PFX_FILE}" \
-    -passout "pass:${PFX_PASS}"
-
-  # cleanup intermediate
-  rm -f cert.key cert.pem
+if [[ ! -f "${CERT_FILE}" || ! -f "${KEY_FILE}" ]]; then
+  echo "Error: ${CERT_FILE} or ${KEY_FILE} not found. Place Let's Encrypt certs in certs/" >&2
+  exit 1
 fi
 
 #######################################
@@ -75,8 +58,9 @@ fi
 SIGNED_EXE="${APP_NAME}-signed.exe"
 echo "==> Signing ${UNSIGNED_EXE} → ${SIGNED_EXE}"
 osslsigncode sign \
-  -pkcs12 "${PFX_FILE}" \
-  -pass "${PFX_PASS}" \
+  -certs "${CERT_FILE}" \
+  -key "${KEY_FILE}" \
+  ${KEY_PASS:+-pass "${KEY_PASS}"} \
   -n "${CERT_CN}" \
   ${TIMESTAMP_URL:+-t "${TIMESTAMP_URL}"} \
   -in "${UNSIGNED_EXE}" \

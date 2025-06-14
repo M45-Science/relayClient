@@ -26,7 +26,7 @@ func (tun *tunnelCon) readFrames() {
 	err := readFrameHeader(tun)
 	if err != nil {
 		if debugLog {
-			doLog(err.Error())
+                   doLog("%v", err)
 		}
 		return
 	}
@@ -35,7 +35,7 @@ func (tun *tunnelCon) readFrames() {
 		err := tun.readPacket()
 		if err != nil {
 			if debugLog {
-				doLog(err.Error())
+                               doLog("%v", err)
 			}
 			return
 		}
