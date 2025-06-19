@@ -27,6 +27,8 @@ func connectTunnel() {
 	con, err := net.Dial("tcp", tunnelServerAddress)
 	if err != nil {
 		doLog("Unable to connect: %v", err)
+		time.Sleep(time.Second * 30)
+		go connectTunnel()
 		return
 	}
 
