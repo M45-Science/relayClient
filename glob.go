@@ -3,6 +3,7 @@ package main
 import (
 	"net"
 	"sync"
+	"time"
 )
 
 var (
@@ -22,6 +23,14 @@ var (
 	ephemeralTop          int = 1
 	ephemeralIDRecycle    []int
 	ephemeralIDRecycleLen int
+
+	ephemeralSessionsTotal int
+	ephemeralPeak          int
+	startTime              time.Time
+	bytesInTotal           int64
+	bytesOutTotal          int64
+
+	serverListUpdaterOnce sync.Once
 
 	ephemeralIDMap   map[int]*ephemeralData    = map[int]*ephemeralData{}
 	ephemeralPortMap map[string]*ephemeralData = map[string]*ephemeralData{}

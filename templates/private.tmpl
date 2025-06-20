@@ -6,6 +6,7 @@
   <title>EU Relay Servers – M45-Science</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="icon.png" rel="shortcut icon" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <style>
     /* -----------------------------------
@@ -63,19 +64,33 @@
     ------------ */
     header {
       background-color: var(--header-bg);
-      text-align: center;
       padding: 20px 10px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    header a {
-      color: inherit;
+    .header-left {
+      display: flex;
+      align-items: center;
       text-decoration: none;
+      color: inherit;
     }
 
-    header img {
+    .header-left img {
       width: 120px;
       height: auto;
+      margin-right: 10px;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      margin: 10px 0 5px;
+      /* Gradient text effect */
+      background: linear-gradient(to right, var(--accent-color-1), var(--accent-color-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     header h1 {
@@ -92,6 +107,21 @@
       font-weight: normal;
       font-style: italic;
       margin: 0;
+    }
+
+    .stats {
+      text-align: right;
+      font-size: 0.9rem;
+    }
+
+    .stats div {
+      margin: 2px 0;
+    }
+
+    .material-icons {
+      vertical-align: middle;
+      font-size: 1rem;
+      margin-right: 4px;
     }
 
     /* ---------------
@@ -284,11 +314,24 @@
 <body>
   <!-- Header -->
   <header>
-    <a href="https://m45sci.xyz/">
+    <a class="header-left" href="https://m45sci.xyz/">
       <img src="https://m45sci.xyz/img/m45.png" alt="M45-Science Logo" />
-      <h1>M45-Science</h1>
-      <h2>EU Relay Portal</h2>
+      <div>
+        <h1>M45-Science</h1>
+        <h2>EU Relay Portal</h2>
+      </div>
     </a>
+      <div id="stats" class="stats">
+        <div id="stats-users"><span class="material-icons">people</span>Active: {{.CurrentUsers}} / Peak: {{.PeakUsers}}</div>
+        <div id="stats-sessions"><span class="material-icons">timer</span>Sessions: {{.TotalSessions}} | Uptime: {{.Uptime}}</div>
+        <div id="stats-settings"><span class="material-icons">tune</span>Batch µs: {{.BatchInterval}} | Compression: {{.Compression}}</div>
+        <div id="stats-sessionList">
+        {{range .Sessions}}
+          <div><span class="material-icons">swap_horiz</span>Session {{.ID}} → {{.DestPort}} | {{.Duration}} | in {{.BytesInStr}} / out {{.BytesOutStr}}</div>
+        {{end}}
+        </div>
+        <div id="stats-total"><span class="material-icons">data_usage</span>Total In: {{.BytesInTotalStr}} / Out: {{.BytesOutTotalStr}}</div>
+      </div>
   </header>
 
   <!-- Content Layout -->
@@ -362,6 +405,23 @@
       </ul>
     </div>
   </div>
+
+  <script>
+    function updateStats() {
+      fetch(window.location.href, {cache: 'no-store'})
+        .then(r => r.text())
+        .then(html => {
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          const newStats = doc.getElementById('stats');
+          if (newStats) {
+            document.getElementById('stats').innerHTML = newStats.innerHTML;
+          }
+        });
+    }
+    setInterval(updateStats, 5000);
+    updateStats();
+  </script>
+
 </body>
 
 </html>

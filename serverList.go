@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strconv"
+	"time"
 )
 
 func handleForwardedPorts(tun *tunnelCon) error {
@@ -75,12 +76,14 @@ func handleForwardedPorts(tun *tunnelCon) error {
 
 	doLog("Forwarded ports: %v", portsStr)
 	outputServerList()
+	startServerListUpdater()
 
 	return nil
 }
 
 func outputServerList() {
-	data := PageData{Servers: []ServerEntry{}}
+	data := gatherStats()
+	data.Servers = []ServerEntry{}
 
 	for i, port := range forwardedPorts {
 		name := forwardedPortsNames[i]
@@ -95,7 +98,8 @@ func outputServerList() {
 		htmlFileName = publicIndexFilename
 	}
 
-	f, err := os.Create(htmlFileName)
+	tmpName := htmlFileName + ".tmp"
+	f, err := os.Create(tmpName)
 	if err != nil {
 		doLog("Failed to create file: %v", err)
 		os.Exit(1)
@@ -107,6 +111,13 @@ func outputServerList() {
 		doLog("Failed to execute template: %v", err)
 		os.Exit(1)
 	}
+
+	if err := os.Rename(tmpName, htmlFileName); err != nil {
+		doLog("Failed to rename output: %v", err)
+		os.Exit(1)
+	}
+
+	saveStats(data)
 
 	doLog("%v written successfully.", htmlFileName)
 
@@ -137,4 +148,34 @@ func openInBrowser(path string) error {
 	}
 
 	return cmd.Start()
+}
+
+func startServerListUpdater() {
+	serverListUpdaterOnce.Do(func() {
+		go func() {
+			for {
+				ephemeralLock.Lock()
+				users := len(ephemeralIDMap)
+				ephemeralLock.Unlock()
+
+				outputServerList()
+
+				if users > 0 {
+					time.Sleep(htmlActiveUpdate)
+				} else {
+					waited := time.Duration(0)
+					for waited < htmlIdleUpdate {
+						time.Sleep(htmlActiveUpdate)
+						waited += htmlActiveUpdate
+						ephemeralLock.Lock()
+						users = len(ephemeralIDMap)
+						ephemeralLock.Unlock()
+						if users > 0 {
+							break
+						}
+					}
+				}
+			}
+		}()
+	})
 }

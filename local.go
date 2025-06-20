@@ -36,6 +36,7 @@ func cleanEphemeralMaps() {
 }
 
 func createEphemeralID() int {
+	ephemeralSessionsTotal++
 	if ephemeralIDRecycleLen > 0 {
 		recycledID := ephemeralIDRecycle[0]
 		ephemeralIDRecycle = ephemeralIDRecycle[1:]
@@ -84,9 +85,13 @@ func handleListeners(tun *tunnelCon) {
 					eID := createEphemeralID()
 
 					newSession = &ephemeralData{
-						id: eID, source: addr.String(),
-						destPort: getPortStr(p.LocalAddr().String()),
-						lastUsed: time.Now(), listener: port}
+						id:        eID,
+						source:    addr.String(),
+						destPort:  getPortStr(p.LocalAddr().String()),
+						lastUsed:  time.Now(),
+						listener:  port,
+						startTime: time.Now(),
+					}
 
 					if tun.con == nil {
 						doLog("Reconnecting on-demand.")
@@ -95,6 +100,9 @@ func handleListeners(tun *tunnelCon) {
 
 					ephemeralPortMap[addr.String()] = newSession
 					ephemeralIDMap[eID] = newSession
+					if len(ephemeralIDMap) > ephemeralPeak {
+						ephemeralPeak = len(ephemeralIDMap)
+					}
 
 					session = newSession
 					doLog("NEW SESSION ID: %v: %v -> %v", newSession.id, newSession.source, newSession.destPort)
@@ -116,7 +124,12 @@ func handleListeners(tun *tunnelCon) {
 				//Write standard header
 				header = binary.AppendUvarint(header, uint64(session.id))
 				header = binary.AppendUvarint(header, uint64(n))
-				tun.write(append(header, buf[:n]...))
+				dataToSend := append(header, buf[:n]...)
+				tun.write(dataToSend)
+				ephemeralLock.Lock()
+				session.bytesOut += int64(len(dataToSend))
+				bytesOutTotal += int64(len(dataToSend))
+				ephemeralLock.Unlock()
 			}
 		}(port)
 	}

@@ -21,11 +21,14 @@ type tunnelCon struct {
 }
 
 type ephemeralData struct {
-	id       int
-	source   string
-	destPort int
-	lastUsed time.Time
-	listener *net.UDPConn
+	id        int
+	source    string
+	destPort  int
+	lastUsed  time.Time
+	listener  *net.UDPConn
+	startTime time.Time
+	bytesIn   int64
+	bytesOut  int64
 }
 
 type ServerEntry struct {
@@ -35,5 +38,34 @@ type ServerEntry struct {
 }
 
 type PageData struct {
-	Servers []ServerEntry
+	Servers          []ServerEntry
+	CurrentUsers     int
+	PeakUsers        int
+	TotalSessions    int
+	Uptime           string
+	BatchInterval    int
+	Compression      int
+	Sessions         []SessionInfo
+	BytesInTotal     int64
+	BytesOutTotal    int64
+	BytesInTotalStr  string
+	BytesOutTotalStr string
+}
+
+type SessionInfo struct {
+	ID          int
+	DestPort    int
+	Duration    string
+	BytesIn     int64
+	BytesOut    int64
+	BytesInStr  string
+	BytesOutStr string
+}
+
+type SavedStats struct {
+	StartTime     time.Time
+	SessionsTotal int
+	PeakUsers     int
+	BytesInTotal  int64
+	BytesOutTotal int64
 }

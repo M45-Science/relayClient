@@ -12,6 +12,8 @@ import (
 )
 
 func main() {
+	startTime = time.Now()
+	loadSavedStats()
 	go func() {
 		err := restoreBinaryName()
 		if err != nil {
