@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	protocolVersion = 1
+	protocolVersion = 2
 	SERVER_KEY      = 0xCAFE69C0FFEE
 	CLIENT_KEY      = 0xADD069C0FFEE
 

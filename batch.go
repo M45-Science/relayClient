@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
-	"compress/gzip"
 	"encoding/binary"
 	"fmt"
 	"io"
+	"runtime"
 	"time"
+
+	"github.com/klauspost/compress/zstd"
 )
 
 func (tun *tunnelCon) write(buf []byte) {
@@ -89,14 +91,14 @@ func writeBatch(tun *tunnelCon) error {
 
 func compressFrame(tun *tunnelCon) []byte {
 	var buf bytes.Buffer
-	gz, _ := gzip.NewWriterLevel(&buf, compressionLevels[compressionLevel])
-	if _, err := gz.Write(tun.packets); err != nil {
-		doLog("compressFrame: gzip write error: %v", err)
-		_ = gz.Close()
+	zw, _ := zstd.NewWriter(&buf, zstd.WithEncoderLevel(zstd.EncoderLevel(compressionLevel)), zstd.WithEncoderConcurrency(runtime.NumCPU()))
+	if _, err := zw.Write(tun.packets); err != nil {
+		doLog("compressFrame: zstd write error: %v", err)
+		_ = zw.Close()
 		return nil
 	}
-	if err := gz.Close(); err != nil {
-		doLog("compressFrame: gzip close error: %v", err)
+	if err := zw.Close(); err != nil {
+		doLog("compressFrame: zstd close error: %v", err)
 		return nil
 	}
 	return buf.Bytes()
@@ -104,15 +106,15 @@ func compressFrame(tun *tunnelCon) []byte {
 
 func decompressFrame(data []byte) ([]byte, error) {
 	buf := bytes.NewReader(data)
-	gz, err := gzip.NewReader(buf)
+	zr, err := zstd.NewReader(buf, zstd.WithDecoderConcurrency(runtime.NumCPU()))
 	if err != nil {
-		return nil, fmt.Errorf("decompressFrame: gzip reader error: %v", err)
+		return nil, fmt.Errorf("decompressFrame: zstd reader error: %v", err)
 	}
-	defer gz.Close()
+	defer zr.Close()
 
 	var out bytes.Buffer
-	if _, err := io.Copy(&out, gz); err != nil {
-		return nil, fmt.Errorf("decompressFrame: gzip decompress copy error: %v", err)
+	if _, err := io.Copy(&out, zr); err != nil {
+		return nil, fmt.Errorf("decompressFrame: zstd decompress copy error: %v", err)
 	}
 	return out.Bytes(), nil
 }
