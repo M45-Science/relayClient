@@ -99,15 +99,3 @@ func gatherStats() PageData {
 		BytesOutTotalStr: humanize.Bytes(uint64(outTotal)),
 	}
 }
-
-func startStatsUpdater() {
-	statsUpdaterOnce.Do(func() {
-		go func() {
-			for {
-				data := gatherStats()
-				saveStats(data)
-				time.Sleep(statsUpdateInterval)
-			}
-		}()
-	})
-}

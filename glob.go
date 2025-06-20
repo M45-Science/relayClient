@@ -30,7 +30,7 @@ var (
 	bytesInTotal           int64
 	bytesOutTotal          int64
 
-	statsUpdaterOnce sync.Once
+	serverListUpdaterOnce sync.Once
 
 	ephemeralIDMap   map[int]*ephemeralData    = map[int]*ephemeralData{}
 	ephemeralPortMap map[string]*ephemeralData = map[string]*ephemeralData{}

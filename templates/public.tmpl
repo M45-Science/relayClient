@@ -184,23 +184,19 @@
   </footer>
 
   <script>
-    function fetchStats() {
-      fetch('serverStats.json')
-        .then(r => r.json())
-        .then(d => {
-          document.getElementById('stats-users').innerHTML = '<span class="material-icons">people</span>Active: ' + d.CurrentUsers + ' / Peak: ' + d.PeakUsers;
-          document.getElementById('stats-sessions').innerHTML = '<span class="material-icons">timer</span>Sessions: ' + d.TotalSessions + ' | Uptime: ' + d.Uptime;
-          document.getElementById('stats-settings').innerHTML = '<span class="material-icons">tune</span>Batch µs: ' + d.BatchInterval + ' | Compression: ' + d.Compression;
-          let sess = '';
-          d.Sessions.forEach(s => {
-            sess += '<div><span class="material-icons">swap_horiz</span>Session ' + s.ID + ' → ' + s.DestPort + ' | ' + s.Duration + ' | in ' + s.BytesInStr + ' / out ' + s.BytesOutStr + '</div>';
-          });
-          document.getElementById('stats-sessionList').innerHTML = sess;
-          document.getElementById('stats-total').innerHTML = '<span class="material-icons">data_usage</span>Total In: ' + d.BytesInTotalStr + ' / Out: ' + d.BytesOutTotalStr;
+    function updateStats() {
+      fetch(window.location.href, {cache: 'no-store'})
+        .then(r => r.text())
+        .then(html => {
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          const newStats = doc.getElementById('stats');
+          if (newStats) {
+            document.getElementById('stats').innerHTML = newStats.innerHTML;
+          }
         });
     }
-    setInterval(fetchStats, 5000);
-    fetchStats();
+    setInterval(updateStats, 5000);
+    updateStats();
   </script>
 </body>
 </html>

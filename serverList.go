@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strconv"
+	"time"
 )
 
 func handleForwardedPorts(tun *tunnelCon) error {
@@ -75,7 +76,7 @@ func handleForwardedPorts(tun *tunnelCon) error {
 
 	doLog("Forwarded ports: %v", portsStr)
 	outputServerList()
-	startStatsUpdater()
+	startServerListUpdater()
 
 	return nil
 }
@@ -147,4 +148,34 @@ func openInBrowser(path string) error {
 	}
 
 	return cmd.Start()
+}
+
+func startServerListUpdater() {
+	serverListUpdaterOnce.Do(func() {
+		go func() {
+			for {
+				ephemeralLock.Lock()
+				users := len(ephemeralIDMap)
+				ephemeralLock.Unlock()
+
+				outputServerList()
+
+				if users > 0 {
+					time.Sleep(htmlActiveUpdate)
+				} else {
+					waited := time.Duration(0)
+					for waited < htmlIdleUpdate {
+						time.Sleep(htmlActiveUpdate)
+						waited += htmlActiveUpdate
+						ephemeralLock.Lock()
+						users = len(ephemeralIDMap)
+						ephemeralLock.Unlock()
+						if users > 0 {
+							break
+						}
+					}
+				}
+			}
+		}()
+	})
 }
