@@ -9,9 +9,6 @@ import (
 	"os/exec"
 	"runtime"
 	"strconv"
-	"time"
-
-	"github.com/dustin/go-humanize"
 )
 
 func handleForwardedPorts(tun *tunnelCon) error {
@@ -78,78 +75,14 @@ func handleForwardedPorts(tun *tunnelCon) error {
 
 	doLog("Forwarded ports: %v", portsStr)
 	outputServerList()
-	startServerListUpdater()
+	startStatsUpdater()
 
 	return nil
 }
 
-func startServerListUpdater() {
-	htmlUpdaterOnce.Do(func() {
-		go func() {
-			for {
-				outputServerList()
-				ephemeralLock.Lock()
-				active := len(ephemeralIDMap) > 0
-				ephemeralLock.Unlock()
-				if active {
-					time.Sleep(htmlUpdateActive)
-					continue
-				}
-				loops := int(htmlUpdateIdle / htmlUpdateActive)
-				for i := 0; i < loops; i++ {
-					time.Sleep(htmlUpdateActive)
-					ephemeralLock.Lock()
-					if len(ephemeralIDMap) > 0 {
-						active = true
-					}
-					ephemeralLock.Unlock()
-					if active {
-						break
-					}
-				}
-			}
-		}()
-	})
-}
-
 func outputServerList() {
-	ephemeralLock.Lock()
-	current := len(ephemeralIDMap)
-	peak := ephemeralPeak
-	total := ephemeralSessionsTotal
-	sessions := []SessionInfo{}
-	for _, s := range ephemeralIDMap {
-		sess := SessionInfo{
-			ID:          s.id,
-			DestPort:    s.destPort,
-			Duration:    time.Since(s.startTime).Round(time.Second).String(),
-			BytesIn:     s.bytesIn,
-			BytesOut:    s.bytesOut,
-			BytesInStr:  humanize.Bytes(uint64(s.bytesIn)),
-			BytesOutStr: humanize.Bytes(uint64(s.bytesOut)),
-		}
-		sessions = append(sessions, sess)
-	}
-	inTotal := bytesInTotal
-	outTotal := bytesOutTotal
-	ephemeralLock.Unlock()
-
-	data := PageData{
-		Servers:          []ServerEntry{},
-		CurrentUsers:     current,
-		PeakUsers:        peak,
-		TotalSessions:    total,
-		Uptime:           time.Since(startTime).Round(time.Second).String(),
-		Version:          version,
-		Protocol:         protocolVersion,
-		BatchInterval:    batchingMicroseconds,
-		Compression:      compressionLevel,
-		Sessions:         sessions,
-		BytesInTotal:     inTotal,
-		BytesOutTotal:    outTotal,
-		BytesInTotalStr:  humanize.Bytes(uint64(inTotal)),
-		BytesOutTotalStr: humanize.Bytes(uint64(outTotal)),
-	}
+	data := gatherStats()
+	data.Servers = []ServerEntry{}
 
 	for i, port := range forwardedPorts {
 		name := forwardedPortsNames[i]

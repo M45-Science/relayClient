@@ -43,8 +43,6 @@ type PageData struct {
 	PeakUsers        int
 	TotalSessions    int
 	Uptime           string
-	Version          string
-	Protocol         int
 	BatchInterval    int
 	Compression      int
 	Sessions         []SessionInfo

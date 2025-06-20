@@ -3,6 +3,9 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"time"
+
+	"github.com/dustin/go-humanize"
 )
 
 func loadSavedStats() {
@@ -58,4 +61,53 @@ func saveStats(data PageData) {
 	if err := os.Rename(tmp, statsFilename); err != nil {
 		doLog("saveStats rename: %v", err)
 	}
+}
+
+func gatherStats() PageData {
+	ephemeralLock.Lock()
+	current := len(ephemeralIDMap)
+	peak := ephemeralPeak
+	total := ephemeralSessionsTotal
+	sessions := []SessionInfo{}
+	for _, s := range ephemeralIDMap {
+		sess := SessionInfo{
+			ID:          s.id,
+			DestPort:    s.destPort,
+			Duration:    time.Since(s.startTime).Round(time.Second).String(),
+			BytesIn:     s.bytesIn,
+			BytesOut:    s.bytesOut,
+			BytesInStr:  humanize.Bytes(uint64(s.bytesIn)),
+			BytesOutStr: humanize.Bytes(uint64(s.bytesOut)),
+		}
+		sessions = append(sessions, sess)
+	}
+	inTotal := bytesInTotal
+	outTotal := bytesOutTotal
+	ephemeralLock.Unlock()
+
+	return PageData{
+		CurrentUsers:     current,
+		PeakUsers:        peak,
+		TotalSessions:    total,
+		Uptime:           time.Since(startTime).Round(time.Second).String(),
+		BatchInterval:    batchingMicroseconds,
+		Compression:      compressionLevel,
+		Sessions:         sessions,
+		BytesInTotal:     inTotal,
+		BytesOutTotal:    outTotal,
+		BytesInTotalStr:  humanize.Bytes(uint64(inTotal)),
+		BytesOutTotalStr: humanize.Bytes(uint64(outTotal)),
+	}
+}
+
+func startStatsUpdater() {
+	statsUpdaterOnce.Do(func() {
+		go func() {
+			for {
+				data := gatherStats()
+				saveStats(data)
+				time.Sleep(statsUpdateInterval)
+			}
+		}()
+	})
 }

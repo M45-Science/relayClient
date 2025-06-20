@@ -13,11 +13,9 @@ const (
 	publicReconDelaySec  = 2
 	privateReconDelaySec = 5
 
-	ephemeralLife   = time.Minute
-	ephemeralTicker = time.Second * 15
-
-	htmlUpdateActive = time.Second * 15
-	htmlUpdateIdle   = time.Minute * 15
+	ephemeralLife       = time.Minute
+	ephemeralTicker     = time.Second * 15
+	statsUpdateInterval = time.Second * 5
 
 	maxAttempts       = 60 / publicReconDelaySec
 	attemptResetAfter = time.Minute * 5

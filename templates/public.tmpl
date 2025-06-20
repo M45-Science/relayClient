@@ -156,15 +156,16 @@
         <h2>Bridge Connect Links:</h2>
       </div>
     </a>
-    <div class="stats">
-      <div><span class="material-icons">people</span>Active: {{.CurrentUsers}} / Peak: {{.PeakUsers}}</div>
-      <div><span class="material-icons">timer</span>Sessions: {{.TotalSessions}} | Uptime: {{.Uptime}}</div>
-      <div><span class="material-icons">build</span>Version: {{.Version}} | Protocol: {{.Protocol}}</div>
-      <div><span class="material-icons">tune</span>Batch µs: {{.BatchInterval}} | Compression: {{.Compression}}</div>
+    <div id="stats" class="stats">
+      <div id="stats-users"><span class="material-icons">people</span>Active: {{.CurrentUsers}} / Peak: {{.PeakUsers}}</div>
+      <div id="stats-sessions"><span class="material-icons">timer</span>Sessions: {{.TotalSessions}} | Uptime: {{.Uptime}}</div>
+      <div id="stats-settings"><span class="material-icons">tune</span>Batch µs: {{.BatchInterval}} | Compression: {{.Compression}}</div>
+      <div id="stats-sessionList">
       {{range .Sessions}}
-      <div>Session {{.ID}} → {{.DestPort}} | {{.Duration}} | in {{.BytesInStr}} / out {{.BytesOutStr}}</div>
+        <div><span class="material-icons">swap_horiz</span>Session {{.ID}} → {{.DestPort}} | {{.Duration}} | in {{.BytesInStr}} / out {{.BytesOutStr}}</div>
       {{end}}
-      <div>Total In: {{.BytesInTotalStr}} / Out: {{.BytesOutTotalStr}}</div>
+      </div>
+      <div id="stats-total"><span class="material-icons">data_usage</span>Total In: {{.BytesInTotalStr}} / Out: {{.BytesOutTotalStr}}</div>
     </div>
   </header>
 
@@ -181,5 +182,25 @@
   <footer>
     2025 M45-Science
   </footer>
+
+  <script>
+    function fetchStats() {
+      fetch('serverStats.json')
+        .then(r => r.json())
+        .then(d => {
+          document.getElementById('stats-users').innerHTML = '<span class="material-icons">people</span>Active: ' + d.CurrentUsers + ' / Peak: ' + d.PeakUsers;
+          document.getElementById('stats-sessions').innerHTML = '<span class="material-icons">timer</span>Sessions: ' + d.TotalSessions + ' | Uptime: ' + d.Uptime;
+          document.getElementById('stats-settings').innerHTML = '<span class="material-icons">tune</span>Batch µs: ' + d.BatchInterval + ' | Compression: ' + d.Compression;
+          let sess = '';
+          d.Sessions.forEach(s => {
+            sess += '<div><span class="material-icons">swap_horiz</span>Session ' + s.ID + ' → ' + s.DestPort + ' | ' + s.Duration + ' | in ' + s.BytesInStr + ' / out ' + s.BytesOutStr + '</div>';
+          });
+          document.getElementById('stats-sessionList').innerHTML = sess;
+          document.getElementById('stats-total').innerHTML = '<span class="material-icons">data_usage</span>Total In: ' + d.BytesInTotalStr + ' / Out: ' + d.BytesOutTotalStr;
+        });
+    }
+    setInterval(fetchStats, 5000);
+    fetchStats();
+  </script>
 </body>
 </html>
