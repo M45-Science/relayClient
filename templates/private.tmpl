@@ -362,6 +362,16 @@
       </ul>
     </div>
   </div>
+  <div style="text-align:center;font-size:0.9rem;margin-top:1rem;">
+    Active: {{.CurrentUsers}} / Peak: {{.PeakUsers}}<br>
+    Sessions: {{.TotalSessions}} | Uptime: {{.Uptime}}<br>
+    Version: {{.Version}} | Protocol: {{.Protocol}}<br>
+    Batch µs: {{.BatchInterval}} | Compression: {{.Compression}}<br>
+    {{range .Sessions}}
+    Session {{.ID}} {{.Source}} → {{.DestPort}} | {{.Duration}} | in {{.BytesIn}}B / out {{.BytesOut}}B<br>
+    {{end}}
+    Total In: {{.BytesInTotal}}B / Out: {{.BytesOutTotal}}B
+  </div>
 </body>
 
 </html>

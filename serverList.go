@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strconv"
+	"time"
 )
 
 func handleForwardedPorts(tun *tunnelCon) error {
@@ -80,7 +81,40 @@ func handleForwardedPorts(tun *tunnelCon) error {
 }
 
 func outputServerList() {
-	data := PageData{Servers: []ServerEntry{}}
+	ephemeralLock.Lock()
+	current := len(ephemeralIDMap)
+	peak := ephemeralPeak
+	total := ephemeralSessionsTotal
+	sessions := []SessionInfo{}
+	for _, s := range ephemeralIDMap {
+		sess := SessionInfo{
+			ID:       s.id,
+			Source:   s.source,
+			DestPort: s.destPort,
+			Duration: time.Since(s.startTime).Round(time.Second).String(),
+			BytesIn:  s.bytesIn,
+			BytesOut: s.bytesOut,
+		}
+		sessions = append(sessions, sess)
+	}
+	inTotal := bytesInTotal
+	outTotal := bytesOutTotal
+	ephemeralLock.Unlock()
+
+	data := PageData{
+		Servers:       []ServerEntry{},
+		CurrentUsers:  current,
+		PeakUsers:     peak,
+		TotalSessions: total,
+		Uptime:        time.Since(startTime).Round(time.Second).String(),
+		Version:       version,
+		Protocol:      protocolVersion,
+		BatchInterval: batchingMicroseconds,
+		Compression:   compressionLevel,
+		Sessions:      sessions,
+		BytesInTotal:  inTotal,
+		BytesOutTotal: outTotal,
+	}
 
 	for i, port := range forwardedPorts {
 		name := forwardedPortsNames[i]

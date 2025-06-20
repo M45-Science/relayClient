@@ -102,6 +102,10 @@ func (tun *tunnelCon) readPacket() error {
 		if w != int(payloadLen) {
 			return fmt.Errorf("only wrote %vb of %vb to %v", w, payloadLen, dest.destPort)
 		}
+		ephemeralLock.Lock()
+		dest.bytesIn += int64(w)
+		bytesInTotal += int64(w)
+		ephemeralLock.Unlock()
 		if verboseDebug {
 			doLog("wrote %vb to %v", w, dest.destPort)
 		}

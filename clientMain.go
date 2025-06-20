@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	startTime = time.Now()
 	go func() {
 		err := restoreBinaryName()
 		if err != nil {

@@ -144,7 +144,15 @@
   </div>
 
   <footer>
-    2025 M45-Science
+    2025 M45-Science<br>
+    Active: {{.CurrentUsers}} / Peak: {{.PeakUsers}}<br>
+    Sessions: {{.TotalSessions}} | Uptime: {{.Uptime}}<br>
+    Version: {{.Version}} | Protocol: {{.Protocol}}<br>
+    Batch µs: {{.BatchInterval}} | Compression: {{.Compression}}<br>
+    {{range .Sessions}}
+    Session {{.ID}} {{.Source}} → {{.DestPort}} | {{.Duration}} | in {{.BytesIn}}B / out {{.BytesOut}}B<br>
+    {{end}}
+    Total In: {{.BytesInTotal}}B / Out: {{.BytesOutTotal}}B
   </footer>
 </body>
 </html>
