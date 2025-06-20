@@ -76,8 +76,26 @@ func handleForwardedPorts(tun *tunnelCon) error {
 
 	doLog("Forwarded ports: %v", portsStr)
 	outputServerList()
+	startServerListUpdater()
 
 	return nil
+}
+
+func startServerListUpdater() {
+	htmlUpdaterOnce.Do(func() {
+		go func() {
+			for {
+				outputServerList()
+				ephemeralLock.Lock()
+				interval := htmlUpdateIdle
+				if len(ephemeralIDMap) > 0 {
+					interval = htmlUpdateActive
+				}
+				ephemeralLock.Unlock()
+				time.Sleep(interval)
+			}
+		}()
+	})
 }
 
 func outputServerList() {
@@ -129,7 +147,8 @@ func outputServerList() {
 		htmlFileName = publicIndexFilename
 	}
 
-	f, err := os.Create(htmlFileName)
+	tmpName := htmlFileName + ".tmp"
+	f, err := os.Create(tmpName)
 	if err != nil {
 		doLog("Failed to create file: %v", err)
 		os.Exit(1)
@@ -139,6 +158,11 @@ func outputServerList() {
 	err = parsedTemplate.Execute(f, data)
 	if err != nil {
 		doLog("Failed to execute template: %v", err)
+		os.Exit(1)
+	}
+
+	if err := os.Rename(tmpName, htmlFileName); err != nil {
+		doLog("Failed to rename output: %v", err)
 		os.Exit(1)
 	}
 

@@ -30,6 +30,8 @@ var (
 	bytesInTotal           int64
 	bytesOutTotal          int64
 
+	htmlUpdaterOnce sync.Once
+
 	ephemeralIDMap   map[int]*ephemeralData    = map[int]*ephemeralData{}
 	ephemeralPortMap map[string]*ephemeralData = map[string]*ephemeralData{}
 	ephemeralLock    sync.Mutex

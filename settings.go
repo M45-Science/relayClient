@@ -16,6 +16,9 @@ const (
 	ephemeralLife   = time.Minute
 	ephemeralTicker = time.Second * 15
 
+	htmlUpdateActive = time.Second * 15
+	htmlUpdateIdle   = time.Minute * 15
+
 	maxAttempts       = 60 / publicReconDelaySec
 	attemptResetAfter = time.Minute * 5
 	tunnelLife        = time.Minute
