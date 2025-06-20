@@ -63,3 +63,11 @@ type SessionInfo struct {
 	BytesInStr  string
 	BytesOutStr string
 }
+
+type SavedStats struct {
+	StartTime     time.Time
+	SessionsTotal int
+	PeakUsers     int
+	BytesInTotal  int64
+	BytesOutTotal int64
+}

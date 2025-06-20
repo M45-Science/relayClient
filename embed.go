@@ -13,6 +13,7 @@ const (
 
 	publicIndexFilename  = "connect-links.html"
 	privateIndexFilename = "index.html"
+	statsFilename        = "serverStats.json"
 	tmplDir              = "templates/"
 )
 

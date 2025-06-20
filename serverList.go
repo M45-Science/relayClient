@@ -183,6 +183,8 @@ func outputServerList() {
 		os.Exit(1)
 	}
 
+	saveStats(data)
+
 	doLog("%v written successfully.", htmlFileName)
 
 	if publicMode {
