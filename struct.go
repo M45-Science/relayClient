@@ -38,25 +38,28 @@ type ServerEntry struct {
 }
 
 type PageData struct {
-	Servers       []ServerEntry
-	CurrentUsers  int
-	PeakUsers     int
-	TotalSessions int
-	Uptime        string
-	Version       string
-	Protocol      int
-	BatchInterval int
-	Compression   int
-	Sessions      []SessionInfo
-	BytesInTotal  int64
-	BytesOutTotal int64
+	Servers          []ServerEntry
+	CurrentUsers     int
+	PeakUsers        int
+	TotalSessions    int
+	Uptime           string
+	Version          string
+	Protocol         int
+	BatchInterval    int
+	Compression      int
+	Sessions         []SessionInfo
+	BytesInTotal     int64
+	BytesOutTotal    int64
+	BytesInTotalStr  string
+	BytesOutTotalStr string
 }
 
 type SessionInfo struct {
-	ID       int
-	Source   string
-	DestPort int
-	Duration string
-	BytesIn  int64
-	BytesOut int64
+	ID          int
+	DestPort    int
+	Duration    string
+	BytesIn     int64
+	BytesOut    int64
+	BytesInStr  string
+	BytesOutStr string
 }

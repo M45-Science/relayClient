@@ -10,6 +10,8 @@ import (
 	"runtime"
 	"strconv"
 	"time"
+
+	"github.com/dustin/go-humanize"
 )
 
 func handleForwardedPorts(tun *tunnelCon) error {
@@ -106,12 +108,13 @@ func outputServerList() {
 	sessions := []SessionInfo{}
 	for _, s := range ephemeralIDMap {
 		sess := SessionInfo{
-			ID:       s.id,
-			Source:   s.source,
-			DestPort: s.destPort,
-			Duration: time.Since(s.startTime).Round(time.Second).String(),
-			BytesIn:  s.bytesIn,
-			BytesOut: s.bytesOut,
+			ID:          s.id,
+			DestPort:    s.destPort,
+			Duration:    time.Since(s.startTime).Round(time.Second).String(),
+			BytesIn:     s.bytesIn,
+			BytesOut:    s.bytesOut,
+			BytesInStr:  humanize.Bytes(uint64(s.bytesIn)),
+			BytesOutStr: humanize.Bytes(uint64(s.bytesOut)),
 		}
 		sessions = append(sessions, sess)
 	}
@@ -120,18 +123,20 @@ func outputServerList() {
 	ephemeralLock.Unlock()
 
 	data := PageData{
-		Servers:       []ServerEntry{},
-		CurrentUsers:  current,
-		PeakUsers:     peak,
-		TotalSessions: total,
-		Uptime:        time.Since(startTime).Round(time.Second).String(),
-		Version:       version,
-		Protocol:      protocolVersion,
-		BatchInterval: batchingMicroseconds,
-		Compression:   compressionLevel,
-		Sessions:      sessions,
-		BytesInTotal:  inTotal,
-		BytesOutTotal: outTotal,
+		Servers:          []ServerEntry{},
+		CurrentUsers:     current,
+		PeakUsers:        peak,
+		TotalSessions:    total,
+		Uptime:           time.Since(startTime).Round(time.Second).String(),
+		Version:          version,
+		Protocol:         protocolVersion,
+		BatchInterval:    batchingMicroseconds,
+		Compression:      compressionLevel,
+		Sessions:         sessions,
+		BytesInTotal:     inTotal,
+		BytesOutTotal:    outTotal,
+		BytesInTotalStr:  humanize.Bytes(uint64(inTotal)),
+		BytesOutTotalStr: humanize.Bytes(uint64(outTotal)),
 	}
 
 	for i, port := range forwardedPorts {

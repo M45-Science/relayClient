@@ -7,6 +7,7 @@
   <!-- Example of optional external stylesheet or favicon references -->
   <link href="m45.css" rel="stylesheet" type="text/css">
   <link href="icon.png" rel="shortcut icon" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   
   <style>
     :root {
@@ -37,17 +38,38 @@
       padding: 0;
     }
 
-    /* Header */
-    header {
-      background-color: var(--header-bg);
-      padding: 2rem 1rem 1rem;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
-    }
-    header .logo {
-      max-width: 120px;
-      height: auto;
-      margin-bottom: 1rem;
-    }
+  /* Header */
+  header {
+    background-color: var(--header-bg);
+    padding: 1.5rem 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header .logo {
+    max-width: 120px;
+    height: auto;
+    margin-right: 10px;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+  }
+  .stats {
+    text-align: right;
+    font-size: 0.9rem;
+  }
+  .stats div {
+    margin: 2px 0;
+  }
+  .material-icons {
+    vertical-align: middle;
+    font-size: 1rem;
+    margin-right: 4px;
+  }
     header h1 {
       font-size: 2.2em;
       color: #ffffff;
@@ -127,10 +149,23 @@
 </head>
 <body>
   <header>
-    <!-- Logo -->
-    <img class="logo" src="https://m45sci.xyz/img/m45.png" alt="M45-Science Logo />
-    <h1>M45-Science</h1>
-    <h2>Bridge Connect Links:</h2>
+    <a class="header-left" href="https://m45sci.xyz/">
+      <img class="logo" src="https://m45sci.xyz/img/m45.png" alt="M45-Science Logo" />
+      <div>
+        <h1>M45-Science</h1>
+        <h2>Bridge Connect Links:</h2>
+      </div>
+    </a>
+    <div class="stats">
+      <div><span class="material-icons">people</span>Active: {{.CurrentUsers}} / Peak: {{.PeakUsers}}</div>
+      <div><span class="material-icons">timer</span>Sessions: {{.TotalSessions}} | Uptime: {{.Uptime}}</div>
+      <div><span class="material-icons">build</span>Version: {{.Version}} | Protocol: {{.Protocol}}</div>
+      <div><span class="material-icons">tune</span>Batch µs: {{.BatchInterval}} | Compression: {{.Compression}}</div>
+      {{range .Sessions}}
+      <div>Session {{.ID}} → {{.DestPort}} | {{.Duration}} | in {{.BytesInStr}} / out {{.BytesOutStr}}</div>
+      {{end}}
+      <div>Total In: {{.BytesInTotalStr}} / Out: {{.BytesOutTotalStr}}</div>
+    </div>
   </header>
 
   <div class="server-list">
@@ -144,15 +179,7 @@
   </div>
 
   <footer>
-    2025 M45-Science<br>
-    Active: {{.CurrentUsers}} / Peak: {{.PeakUsers}}<br>
-    Sessions: {{.TotalSessions}} | Uptime: {{.Uptime}}<br>
-    Version: {{.Version}} | Protocol: {{.Protocol}}<br>
-    Batch µs: {{.BatchInterval}} | Compression: {{.Compression}}<br>
-    {{range .Sessions}}
-    Session {{.ID}} {{.Source}} → {{.DestPort}} | {{.Duration}} | in {{.BytesIn}}B / out {{.BytesOut}}B<br>
-    {{end}}
-    Total In: {{.BytesInTotal}}B / Out: {{.BytesOutTotal}}B
+    2025 M45-Science
   </footer>
 </body>
 </html>
