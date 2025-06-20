@@ -6,3 +6,4 @@
 /relayClient
 log
 certs/
+serverStats.json
