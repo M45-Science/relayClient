@@ -89,12 +89,24 @@ func startServerListUpdater() {
 			for {
 				outputServerList()
 				ephemeralLock.Lock()
-				interval := htmlUpdateIdle
-				if len(ephemeralIDMap) > 0 {
-					interval = htmlUpdateActive
-				}
+				active := len(ephemeralIDMap) > 0
 				ephemeralLock.Unlock()
-				time.Sleep(interval)
+				if active {
+					time.Sleep(htmlUpdateActive)
+					continue
+				}
+				loops := int(htmlUpdateIdle / htmlUpdateActive)
+				for i := 0; i < loops; i++ {
+					time.Sleep(htmlUpdateActive)
+					ephemeralLock.Lock()
+					if len(ephemeralIDMap) > 0 {
+						active = true
+					}
+					ephemeralLock.Unlock()
+					if active {
+						break
+					}
+				}
 			}
 		}()
 	})
