@@ -17,3 +17,5 @@ M45 RELAY CLIENT INSTRUCTIONS
    - Click "Connect"
 
 -----------------------------
+
+Downloadable version here: http://eu.m45sci.xyz/
