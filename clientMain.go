@@ -13,7 +13,7 @@ import (
 
 func main() {
 	startTime = time.Now()
-	loadSavedStats()
+	//loadSavedStats()
 	go func() {
 		err := restoreBinaryName()
 		if err != nil {
