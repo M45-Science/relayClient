@@ -104,7 +104,6 @@ func outputServerList() {
 		doLog("Failed to create file: %v", err)
 		os.Exit(1)
 	}
-	defer f.Close()
 
 	err = parsedTemplate.Execute(f, data)
 	if err != nil {
@@ -112,6 +111,7 @@ func outputServerList() {
 		os.Exit(1)
 	}
 
+	f.Close()
 	if err := os.Rename(tmpName, htmlFileName); err != nil {
 		doLog("Failed to rename output: %v", err)
 		os.Exit(1)
